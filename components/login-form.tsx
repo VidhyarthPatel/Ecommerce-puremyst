@@ -30,6 +30,13 @@ export function LoginForm({
     });
   };
 
+  const handleSignupWithGoogle = async() => {
+    signIn("google")
+  }
+  const handleSignupWithFacebook = async() => {
+    signIn("facebook")
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -75,8 +82,11 @@ export function LoginForm({
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button onClick={handleSignupWithGoogle} variant="outline" className="w-full">
                   Login with Google
+                </Button>
+                <Button onClick={handleSignupWithFacebook} variant="outline" className="w-full">
+                  Login with Facebook
                 </Button>
               </div>
             </div>
