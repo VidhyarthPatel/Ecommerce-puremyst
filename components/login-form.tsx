@@ -18,24 +18,22 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState("");
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await signIn("credentials", {
+    if (!email) return;
+    await signIn("resend", {
       email,
-      password,
-      redirect: false,
+      callbackUrl: "/", // redirect to home
     });
   };
 
-  const handleSignupWithGoogle = async() => {
-    signIn("google")
-  }
-  const handleSignupWithFacebook = async() => {
-    signIn("facebook")
-  }
+  const handleSignupWithGoogle = async () => {
+    await signIn("google", {
+      callbackUrl: "/", // redirect to home
+    });
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -43,50 +41,33 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to login with a magic link
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup}>
+          <form onSubmit={handleEmailLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   id="email"
                   type="email"
                   placeholder="m@example.com"
                   required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  id="password"
-                  type="password"
-                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
-                  Login
+                  Send Magic Link
                 </Button>
-                <Button onClick={handleSignupWithGoogle} variant="outline" className="w-full">
+                <Button
+                  onClick={handleSignupWithGoogle}
+                  variant="outline"
+                  className="w-full"
+                >
                   Login with Google
-                </Button>
-                <Button onClick={handleSignupWithFacebook} variant="outline" className="w-full">
-                  Login with Facebook
                 </Button>
               </div>
             </div>
