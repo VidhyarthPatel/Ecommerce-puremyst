@@ -1,14 +1,18 @@
 import React from "react";
-// import Nav from './nav'
 import Posters from "./Posters";
 
 function HeroSection() {
   return (
-    <div>
+    <div className="relative">
       <Posters />
-      <div className="w-full bg-blue-700 text-white py-2 md:py-3 text-center font-medium text-lg md:text-xl">
-        Over <span className="font-bold text-white">12 Years of Expertise</span>{" "}
-        in Water Purifiers
+      {/* Expertise Banner */}
+      <div className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-lg font-light tracking-wide">
+            Trusted by families across India for over{" "}
+            <span className="font-semibold text-white">12 years</span> of pure water excellence
+          </p>
+        </div>
       </div>
     </div>
   );

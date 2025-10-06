@@ -4,28 +4,45 @@ import AboutIMG from "../assets/aboutIMG.png";
 
 function AboutUs() {
   return (
-    <section
-      id="about"
-      className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8"
-    >
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10">
-        {/* Image */}
-        <div className="w-full lg:w-1/2 flex justify-center">
-          <Image
-            src={AboutIMG}
-            alt="About Us"
-            className="rounded-xl shadow-lg w-full max-w-md object-cover"
-          />
-        </div>
+    <section className="bg-white py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-center gap-16">
+          {/* Image */}
+          <div className="w-full lg:w-1/2">
+            <div className="relative">
+              <Image
+                src={AboutIMG}
+                alt="Pure Water Solutions"
+                className="rounded-2xl shadow-lg w-full object-cover"
+              />
+              {/* Decorative element */}
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-blue-600 rounded-2xl -z-10"></div>
+            </div>
+          </div>
 
-        {/* Text Content */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6 text-center lg:text-left">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#154D71]">
-            About Us
-          </h2>
-          <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-            We provide all types of water purifiers including electric, non-electric, UV, RO, commercial RO, and industrial RO purifiers, with sales and service across India. Quality, reliability, and customer satisfaction are at the heart of what we do.
-          </p>
+          {/* Text Content */}
+          <div className="w-full lg:w-1/2">
+            <div className="max-w-lg">
+              <div className="w-16 h-1 bg-blue-600 mb-6"></div>
+              <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
+                About PureMyst
+              </h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p className="text-lg">
+                  For over a decade, we've been at the forefront of water purification technology, 
+                  providing comprehensive solutions across India.
+                </p>
+                <p>
+                  Our expertise spans electric, non-electric, UV, RO, commercial, and industrial 
+                  purification systems—all backed by unwavering commitment to quality and 
+                  customer satisfaction.
+                </p>
+                <p className="text-sm text-gray-500 font-medium">
+                  Trusted by homes and businesses nationwide for reliable, pure water solutions.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

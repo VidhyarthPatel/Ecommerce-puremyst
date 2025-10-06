@@ -1,13 +1,29 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import poster from "../assets/posters.png";
 
 const posters = [
-  { id: 1, src: "https://www.kent.co.in/images/banners/water-banner.jpg", alt: "Poster 1" },
-  { id: 2, src: "https://www.kent.co.in/images/banners/water-banner.jpg", alt: "Poster 2" },
-  { id: 3, src: "https://www.kent.co.in/images/banners/water-banner.jpg", alt: "Poster 3" },
+  { 
+    id: 1, 
+    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+    alt: "Advanced Water Purification",
+    title: "Pure Water, Healthy Life",
+    subtitle: "Advanced RO+UV+UF Technology"
+  },
+  { 
+    id: 2, 
+    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+    alt: "Mineral Protection",
+    title: "Preserve Essential Minerals",
+    subtitle: "TDS Controller for Healthy Water"
+  },
+  { 
+    id: 3, 
+    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+    alt: "Smart Purification",
+    title: "Smart Water Solutions",
+    subtitle: "IoT Enabled Purification Systems"
+  },
 ];
 
 export default function PosterSlider() {
@@ -30,52 +46,63 @@ export default function PosterSlider() {
   };
 
   return (
-    <div className="relative w-full h-[400px] md:h-[600px] overflow-hidden">
-      {/* Wrapper that moves left */}
+    <div className="relative w-full h-[500px] md:h-[700px] overflow-hidden bg-gray-100">
+      {/* Slides Container */}
       <div
-        className="flex transition-transform duration-1000 ease-in-out"
+        className="flex transition-transform duration-1000 ease-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {posters.map((poster) => (
           <div
             key={poster.id}
-            className="w-full flex-shrink-0 relative h-[400px] md:h-[600px]"
+            className="w-full flex-shrink-0 relative h-[500px] md:h-[700px]"
           >
             <img
               src={poster.src}
               alt={poster.alt}
-              // fill
-              className="object-cover"
-              // priority={poster.id === 1}
+              className="w-full h-full object-cover"
             />
+            
+            {/* Text Overlay */}
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <div className="text-center text-white max-w-2xl px-4">
+                <h1 className="text-4xl md:text-6xl font-light mb-4 tracking-tight">
+                  {poster.title}
+                </h1>
+                <p className="text-xl md:text-2xl font-light text-gray-100">
+                  {poster.subtitle}
+                </p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Left Arrow */}
+      {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition"
+        className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 backdrop-blur-sm"
       >
         <ChevronLeft size={28} />
       </button>
 
-      {/* Right Arrow */}
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition"
+        className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 backdrop-blur-sm"
       >
         <ChevronRight size={28} />
       </button>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3">
         {posters.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`w-3 h-3 rounded-full transition ${
-              current === index ? "bg-white" : "bg-gray-400"
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              current === index 
+                ? "bg-white w-8" 
+                : "bg-white/50 hover:bg-white/80"
             }`}
           />
         ))}

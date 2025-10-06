@@ -4,6 +4,7 @@ import Providers from "@/provider";
 import Nav from "@/components/nav";
 import "@/app/globals.css";
 import ScrollToTopOnNavigation from "@/components/ScrollToTopOnNavigation";
+import Footer from "@/components/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Nav />
         <ScrollToTopOnNavigation />
         <Providers>{children}</Providers>
+        <Footer />
       </body>
     </html>
   );
