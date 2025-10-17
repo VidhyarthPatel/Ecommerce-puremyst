@@ -14,6 +14,7 @@ const productSchema = z.object({
   featured: z.boolean().optional(),
   rating: z.number().min(0).max(5).optional(),
   images: z.array(z.string().url()).optional(),
+  category: z.string().min(1, "Category is required"),
 });
 
 // ------------------ CREATE PRODUCT ------------------
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
     const product = await prisma.products.create({
       data: {
         name: rest.name ?? "",
+        category: rest.category,
         slug: newSlug, // use generated slug
         description: rest.description ?? "",
         price: rest.price ?? 0,
@@ -102,8 +104,14 @@ export async function PUT(req: Request) {
     const updatedProduct = await prisma.products.update({
       where: { slug }, // match old slug
       data: {
-        ...rest,
+        name: rest.name ?? "",
+        description: rest.description ?? "",
+        price: rest.price ?? 0,
+        units: rest.units ?? 0,
+        category: rest.category,
         slug: newSlug, // update slug
+        featured: rest.featured ?? false,
+        rating: rest.rating ?? 0,
         ProductsImage: {
           deleteMany: {}, // clear old
           create: (images ?? []).map((url) => ({ imageUrl: url })),

@@ -35,6 +35,7 @@ type Product = {
   featured: boolean;
   rating: number;
   units: number;
+  category: string;
   createdAt: string;
   ProductsImage: { id: string; imageUrl: string }[];
 };
@@ -55,11 +56,19 @@ export default function ProductsPage() {
   const [deleting, setDeleting] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
 
+  const categoryOptions = [
+    "RO Water Purifier",
+    "Commercial Water Purifier",
+    "Washing Machine Cleaner",
+    "Accessories",
+  ];
+
   const [formData, setFormData] = React.useState({
     name: "",
     price: "",
     units: "",
     description: "",
+    category: categoryOptions[0],
     images: [] as string[],
     currentImage: "",
     rating: "",
@@ -85,55 +94,41 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // Cloudinary upload function with better error handling
- // Updated client-side upload using API route with better error handling
-const uploadToCloudinary = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    // First, check if we got a valid response
-    if (!response.ok) {
-      // Try to get error message from response
-      const errorText = await response.text();
-      console.error('API Error Response:', errorText);
-      
-      // Check if it's HTML (starts with <!DOCTYPE)
-      if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-        throw new Error('Server error: API route not working properly');
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (errorText.trim().startsWith("<!DOCTYPE") || errorText.trim().startsWith("<html")) {
+          throw new Error("Server error: API route not working properly");
+        }
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.error || `Upload failed: ${response.status}`);
+        } catch {
+          throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        }
       }
-      
-      // Try to parse as JSON
-      try {
-        const errorData = JSON.parse(errorText);
-        throw new Error(errorData.error || `Upload failed: ${response.status}`);
-      } catch {
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
-      }
-    }
 
-    // If response is OK, parse as JSON
-    const result = await response.json();
-    
-    if (!result.url) {
-      throw new Error('No URL returned from server');
+      const result = await response.json();
+      if (!result.url) throw new Error("No URL returned from server");
+      return result.url;
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw new Error(
+        `Failed to upload image: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
-
-    return result.url;
-  } catch (error) {
-    console.error("Upload error:", error);
-    throw new Error(
-      `Failed to upload image: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
-  }
-};
+  };
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -145,14 +140,10 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-
-        // Validate file type
         if (!file.type.startsWith("image/")) {
           toast.error("❌ Please upload only image files");
           continue;
         }
-
-        // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
           toast.error("❌ Image size should be less than 5MB");
           continue;
@@ -177,7 +168,6 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
       });
     } finally {
       setUploading(false);
-      // Clear the file input
       event.target.value = "";
     }
   };
@@ -208,6 +198,7 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
       price: "",
       units: "",
       description: "",
+      category: categoryOptions[0],
       images: [],
       currentImage: "",
       rating: "",
@@ -216,7 +207,6 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
   };
 
   const handleSave = async () => {
-    // Validation
     if (!formData.name.trim() || !formData.price || !formData.units) {
       toast.error("❌ Please fill in all required fields");
       return;
@@ -227,6 +217,7 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
       price: Number(formData.price),
       units: Number(formData.units),
       description: formData.description.trim(),
+      category: formData.category,
       images: formData.images,
       rating: Number(formData.rating) || 0,
     };
@@ -279,6 +270,7 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
       price: product.price?.toString() ?? "",
       units: product.units?.toString() ?? "",
       description: product.description ?? "",
+      category: product.category ?? categoryOptions[0],
       images: product.ProductsImage?.map((img) => img.imageUrl) || [],
       currentImage: "",
       rating: product.rating?.toString() ?? "0.0",
@@ -370,16 +362,38 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                   <Label>Name *</Label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("name", e.target.value)
+                    }
                     placeholder="Enter product name"
                   />
                 </div>
+
+                <div>
+                  <Label>Category *</Label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      handleInputChange("category", e.target.value)
+                    }
+                    className="w-full border rounded p-2"
+                  >
+                    {categoryOptions.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div>
                   <Label>Price *</Label>
                   <Input
                     type="number"
                     value={formData.price}
-                    onChange={(e) => handleInputChange("price", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("price", e.target.value)
+                    }
                     placeholder="0.00"
                     min="0"
                     step="0.01"
@@ -390,7 +404,9 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                   <Input
                     type="number"
                     value={formData.units}
-                    onChange={(e) => handleInputChange("units", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("units", e.target.value)
+                    }
                     placeholder="0"
                     min="0"
                   />
@@ -407,7 +423,7 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                   />
                 </div>
 
-                {/* Cloudinary Upload Section */}
+                {/* Cloudinary Upload & Image URLs */}
                 <div>
                   <Label>Upload Images</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
@@ -446,7 +462,6 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                     )}
                   </div>
 
-                  {/* Manual URL input as fallback */}
                   <div className="mt-3">
                     <Label>Or add image by URL</Label>
                     <div className="flex gap-2 mt-1">
@@ -467,7 +482,6 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                     </div>
                   </div>
 
-                  {/* Image Preview */}
                   {formData.images.length > 0 && (
                     <div className="mt-3">
                       <Label>Image Previews ({formData.images.length})</Label>
@@ -478,10 +492,6 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                               src={img}
                               className="w-20 h-20 rounded border object-cover"
                               alt={`Preview ${idx + 1}`}
-                              onError={(e) => {
-                                e.currentTarget.src =
-                                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%239ca3af'%3EImage%3C/text%3E%3C/svg%3E";
-                              }}
                             />
                             <Button
                               size="sm"
@@ -560,6 +570,7 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                 <TableRow>
                   <TableHead className="w-32">Images</TableHead>
                   <TableHead className="w-40">Name</TableHead>
+                  <TableHead className="w-36">Category</TableHead>
                   <TableHead className="w-24">Price</TableHead>
                   <TableHead className="w-20">Units</TableHead>
                   <TableHead className="w-48">Description</TableHead>
@@ -571,80 +582,36 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                 {products.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="w-32">
-                      <div className="flex gap-1 flex-wrap">
-                        {p.ProductsImage.length > 0 ? (
-                          <>
-                            {p.ProductsImage.slice(0, 3).map((img) => (
-                              <img
-                                key={img.id}
-                                src={img.imageUrl}
-                                className="h-10 w-10 rounded object-cover border"
-                                alt="Product"
-                                onError={(e) => {
-                                  e.currentTarget.src =
-                                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='8' fill='%239ca3af'%3EImage%3C/text%3E%3C/svg%3E";
-                                }}
-                              />
-                            ))}
-                            {p.ProductsImage.length > 3 && (
-                              <div className="h-10 w-10 rounded border bg-gray-100 flex items-center justify-center text-xs font-medium">
-                                +{p.ProductsImage.length - 3}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="h-10 w-10 rounded border bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            No Image
-                          </div>
-                        )}
+                      <div className="flex gap-1">
+                        {p.ProductsImage?.map((img) => (
+                          <img
+                            key={img.id}
+                            src={img.imageUrl}
+                            className="w-10 h-10 rounded border object-cover"
+                          />
+                        ))}
                       </div>
                     </TableCell>
-                    <TableCell className="w-40">
-                      <div className="truncate max-w-[160px]" title={p.name}>
-                        {p.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-24">
-                      <span className="font-medium">${p.price.toFixed(2)}</span>
-                    </TableCell>
-                    <TableCell className="w-20">
-                      <span className="font-medium">{p.units}</span>
-                    </TableCell>
-                    <TableCell className="w-48">
-                      <div
-                        className="truncate max-w-[192px]"
-                        title={p.description}
+                    <TableCell>{p.name}</TableCell>
+                    <TableCell>{p.category}</TableCell>
+                    <TableCell>₹{p.price}</TableCell>
+                    <TableCell>{p.units}</TableCell>
+                    <TableCell className="line-clamp-2">{p.description}</TableCell>
+                    <TableCell>{p.rating}</TableCell>
+                    <TableCell className="flex gap-2">
+                      <Button size="sm" onClick={() => handleEdit(p)}>
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          setProductToDelete(p);
+                          setDeleteDialogOpen(true);
+                        }}
                       >
-                        {p.description}
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-24">
-                      <Badge variant="secondary">{p.rating} ⭐</Badge>
-                    </TableCell>
-                    <TableCell className="w-32">
-                      <div className="flex gap-2 items-center">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleEdit(p)}
-                          className="h-8 cursor-pointer"
-                          disabled={saving}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setProductToDelete(p);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 bg-red-100 hover:bg-red-200 cursor-pointer"
-                          disabled={deleting}
-                        >
-                          <Trash className="w-4 h-4" />
-                        </Button>
-                      </div>
+                        Delete
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -652,75 +619,32 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
             </Table>
           </div>
 
-          {/* Mobile Card View */}
-          <div className="md:hidden space-y-4">
+          {/* Mobile Cards */}
+          <div className="grid md:hidden gap-4">
             {products.map((p) => (
               <div
                 key={p.id}
-                className="bg-white border rounded-lg p-4 shadow-sm"
+                className="border rounded-md p-3 flex flex-col gap-2 shadow-sm"
               >
-                <div className="flex gap-3 mb-3">
-                  <div className="flex gap-1 flex-shrink-0">
-                    {p.ProductsImage.length > 0 ? (
-                      <>
-                        {p.ProductsImage.slice(0, 2).map((img) => (
-                          <img
-                            key={img.id}
-                            src={img.imageUrl}
-                            className="h-12 w-12 rounded object-cover border"
-                            alt="Product"
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%239ca3af'%3EImage%3C/text%3E%3C/svg%3E";
-                            }}
-                          />
-                        ))}
-                        {p.ProductsImage.length > 2 && (
-                          <div className="h-12 w-12 rounded border bg-gray-100 flex items-center justify-center text-xs font-medium">
-                            +{p.ProductsImage.length - 2}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="h-12 w-12 rounded border bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                        No Image
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate" title={p.name}>
-                      {p.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="font-bold text-green-600">
-                        ${p.price.toFixed(2)}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        {p.rating} ⭐
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Units: {p.units}
-                    </p>
-                  </div>
-                </div>
-
-                <p
-                  className="text-sm text-gray-600 mb-3 line-clamp-2"
-                  title={p.description}
-                >
-                  {p.description}
-                </p>
-
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleEdit(p)}
-                    className="flex-1 h-8"
-                    disabled={saving}
-                  >
+                  {p.ProductsImage?.map((img) => (
+                    <img
+                      key={img.id}
+                      src={img.imageUrl}
+                      className="w-16 h-16 rounded border object-cover"
+                    />
+                  ))}
+                </div>
+                <div>
+                  <p className="font-semibold">{p.name}</p>
+                  <p className="text-sm text-gray-500">{p.category}</p>
+                  <p className="text-sm">₹{p.price}</p>
+                  <p className="text-xs line-clamp-3">{p.description}</p>
+                  <p className="text-sm">Units: {p.units}</p>
+                  <p className="text-sm">Rating: {p.rating}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleEdit(p)}>
                     Edit
                   </Button>
                   <Button
@@ -730,71 +654,50 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
                       setProductToDelete(p);
                       setDeleteDialogOpen(true);
                     }}
-                    className="h-8 w-8 p-0"
-                    disabled={deleting}
                   >
-                    <Trash className="w-4 h-4" />
+                    Delete
                   </Button>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Delete Confirmation Dialog */}
-          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <DialogContent className="sm:max-w-sm max-h-[90vh]">
-              <DialogHeader>
-                <DialogTitle>Confirm Delete</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <p className="break-words">
-                  Are you sure you want to delete{" "}
-                  <strong className="break-words">
-                    {productToDelete?.name}
-                  </strong>
-                  ?
-                </p>
-                {productToDelete?.description && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                    <p className="text-sm text-gray-600 font-medium mb-1">
-                      Description:
-                    </p>
-                    <p
-                      className="text-sm text-gray-700 break-words line-clamp-3"
-                      title={productToDelete.description}
-                    >
-                      {productToDelete.description}
-                    </p>
-                  </div>
-                )}
-              </div>
-              <DialogFooter className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeleteDialogOpen(false)}
-                  disabled={deleting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{productToDelete?.name}</strong>?
+          </p>
+          <DialogFooter className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
