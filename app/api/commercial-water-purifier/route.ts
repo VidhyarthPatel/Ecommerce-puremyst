@@ -5,8 +5,8 @@ export async function GET() {
     try{
         const products = await prisma.products.findMany({
             where: {
-                categories: { 
-                    has: "Industrial-Water-Purifier" 
+                category: { 
+                    equals: "Commercial Water Purifier" 
                 },
             },
             include: {

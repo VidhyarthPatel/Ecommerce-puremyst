@@ -27,12 +27,12 @@ export default function NavServer() {
         { href: "/ro-water-purifier", label: "RO Water Purifier" },
         { href: "/commercial-water-purifier", label: "Commercial Water Purifier" },
         { href: "/washing-machine-cleaner", label: "Washing Machine Cleaner" },
-        // { href: "/pipes", label: "Pipes" },
         { href: "/accessories", label: "Accessories" },
         { href: "/products", label: "View All Products →", highlight: true },
       ],
     },
     { href: "/AboutUs", label: "About Us" },
+    { href: "/contact", label: "Contact" },
     { href: "/sale", label: "Sale", highlight: true },
   ];
 

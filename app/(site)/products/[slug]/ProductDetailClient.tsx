@@ -1,84 +1,51 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { Loader2, Check } from "lucide-react";
+import { useCart } from "@/hooks/use-cart";
 
 export default function ProductDetailClient({ product }: { product: any }) {
   const [previewImage, setPreviewImage] = useState(
     product.ProductsImage?.[0]?.imageUrl || "/placeholder.png"
   );
-  const [loading, setLoading] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const { data: session } = useSession();
+  const { addToCart, loading, hasItem } = useCart();
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // Update cart in real-time if needed
-  const updateCart = () => window.dispatchEvent(new Event("cartUpdated"));
-
   const handleAddToCart = async () => {
-    if (!session) {
-      console.log("User not logged in");
-      return;
-    }
-
-    setLoading(true);
     try {
-      const res = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: session.user?.id,
-          productSlug: product.slug, // Using slug
-          quantity,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add to cart");
-      }
+      await addToCart({
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+      }, quantity);
 
       setAddedToCart(true);
-      updateCart();
       setTimeout(() => setAddedToCart(false), 2000);
     } catch (err) {
       console.error("Add to cart error:", err);
       alert("Failed to add product to cart. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleBuyNow = async () => {
-    if (!session) return;
-
-    setLoading(true);
     try {
-      const res = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: session.user?.id,
-          productSlug: product.slug,
-          quantity,
-        }),
-      });
+      await addToCart({
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+      }, quantity);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add to cart");
-      }
-
-      updateCart();
       window.location.href = "/checkout"; // redirect to checkout
     } catch (err) {
       console.error("Buy now error:", err);
       alert("Failed to proceed with purchase. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -169,18 +136,14 @@ export default function ProductDetailClient({ product }: { product: any }) {
           <div className="space-y-4 mb-8">
             <button
               onClick={handleAddToCart}
-              disabled={loading || addedToCart || !session}
+              disabled={loading || addedToCart}
               className={`w-full py-4 rounded-xl font-medium flex items-center justify-center gap-2 ${
                 addedToCart
                   ? "bg-green-500 text-white"
-                  : !session
-                  ? "bg-gray-400 text-white cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              {!session
-                ? "Please login to add to cart"
-                : loading
+              {loading
                 ? "Adding..."
                 : addedToCart
                 ? "Added to Cart"
@@ -189,14 +152,10 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
             <button
               onClick={handleBuyNow}
-              disabled={!session || loading}
-              className={`w-full py-4 rounded-xl font-medium ${
-                !session
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
+              disabled={loading}
+              className="w-full py-4 rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700"
             >
-              {!session ? "Please login to buy" : "Buy Now"}
+              Buy Now
             </button>
           </div>
 

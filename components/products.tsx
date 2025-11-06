@@ -1,7 +1,26 @@
+"use client";
+
 import React from "react";
 import { tempProducts } from "./tempProduct";
+import { useCart } from "@/hooks/use-cart";
 
 export default function Products() {
+  const { addToCart, loading } = useCart();
+
+  const handleAddToCart = async (product: any) => {
+    try {
+      await addToCart({
+        id: product.id,
+        slug: product.slug || product.id, // Use slug if available, otherwise use id
+        name: product.name,
+        price: product.discountPrice || product.price,
+        imageUrl: product.imageUrl,
+      });
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -41,8 +60,12 @@ export default function Products() {
                 </div>
                 
                 {/* Add to Cart - Always visible but enhanced on hover */}
-                <button className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 transform group-hover:scale-105">
-                  Add to Cart
+                <button 
+                  onClick={() => handleAddToCart(product)}
+                  disabled={loading}
+                  className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 transform group-hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Adding..." : "Add to Cart"}
                 </button>
               </div>
             </div>
