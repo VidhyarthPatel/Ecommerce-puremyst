@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { Minus, Plus, X, CreditCard, MapPin, User, Mail, Phone } from "lucide-react";
 import Link from "next/link";
+import RazorpayCheckoutButton from "@/components/ui/RazorpayCheckoutButton";
 
 interface GuestInfo {
   name: string;
@@ -33,6 +34,8 @@ export default function CheckoutPage() {
   const subtotal = totalPrice;
   const shipping = subtotal > 0 ? 99 : 0;
   const total = subtotal + shipping;
+
+  
 
   const handleInputChange = (field: keyof GuestInfo, value: string) => {
     setGuestInfo(prev => ({ ...prev, [field]: value }));
@@ -329,17 +332,22 @@ export default function CheckoutPage() {
               </div>
 
               {/* Place Order Button */}
-              <button
+              {/* <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Processing..." : "Place Order"}
-              </button>
+              </button> */}
+              <RazorpayCheckoutButton  amountRupees={total} />
               
               <p className="text-xs text-gray-500 text-center mt-3">
                 By placing this order, you agree to our terms and conditions
               </p>
+
+           
+             
+
             </div>
           </div>
         </form>
