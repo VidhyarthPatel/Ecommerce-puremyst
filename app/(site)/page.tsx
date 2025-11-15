@@ -1,4 +1,5 @@
 import AboutUs from "@/components/AboutUs";
+import Products from "@/components/BestSelling";
 import BestSelling from "@/components/BestSelling";
 import HeroSection from "@/components/HeroSection";
 

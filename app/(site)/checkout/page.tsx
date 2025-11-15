@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
-import { Minus, Plus, X, CreditCard, MapPin, User, Mail, Phone } from "lucide-react";
+import {
+  MapPin,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import RazorpayCheckoutButton from "@/components/ui/RazorpayCheckoutButton";
 
@@ -14,11 +17,11 @@ interface GuestInfo {
   city: string;
   state: string;
   zipCode: string;
-  paymentMethod: "card" | "upi" | "cod";
 }
 
 export default function CheckoutPage() {
-  const { cartItems, totalItems, totalPrice, removeItem, updateQuantity } = useCart();
+  const { cartItems, totalItems, totalPrice, removeItem, updateQuantity } =
+    useCart();
   const [loading, setLoading] = useState(false);
   const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     name: "",
@@ -28,17 +31,14 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     zipCode: "",
-    paymentMethod: "upi",
   });
 
   const subtotal = totalPrice;
   const shipping = subtotal > 0 ? 99 : 0;
   const total = subtotal + shipping;
 
-  
-
   const handleInputChange = (field: keyof GuestInfo, value: string) => {
-    setGuestInfo(prev => ({ ...prev, [field]: value }));
+    setGuestInfo((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
     try {
       const orderData = {
         guestInfo,
-        items: cartItems.map(item => ({
+        items: cartItems.map((item) => ({
           productId: item.id,
           productSlug: item.slug,
           name: item.name,
@@ -73,10 +73,10 @@ export default function CheckoutPage() {
       }
 
       const order = await response.json();
-      
+
       // Clear cart after successful order
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('ecommerce_cart');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("ecommerce_cart");
         window.dispatchEvent(new Event("cartUpdated"));
       }
 
@@ -94,7 +94,9 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-light text-gray-900 mb-4">Your cart is empty</h2>
+          <h2 className="text-2xl font-light text-gray-900 mb-4">
+            Your cart is empty
+          </h2>
           <Link href="/products">
             <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               Continue Shopping
@@ -113,7 +115,10 @@ export default function CheckoutPage() {
           <p className="text-gray-600">Complete your order as a guest</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        >
           {/* Guest Information Form */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -121,7 +126,7 @@ export default function CheckoutPage() {
                 <User className="w-5 h-5" />
                 Contact Information
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,7 +141,7 @@ export default function CheckoutPage() {
                     placeholder="Enter your full name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address *
@@ -150,7 +155,7 @@ export default function CheckoutPage() {
                     placeholder="Enter your email"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number *
@@ -172,7 +177,7 @@ export default function CheckoutPage() {
                 <MapPin className="w-5 h-5" />
                 Shipping Address
               </h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -182,12 +187,14 @@ export default function CheckoutPage() {
                     type="text"
                     required
                     value={guestInfo.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("address", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your street address"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -197,12 +204,14 @@ export default function CheckoutPage() {
                       type="text"
                       required
                       value={guestInfo.city}
-                      onChange={(e) => handleInputChange("city", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("city", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="City"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       State *
@@ -211,12 +220,14 @@ export default function CheckoutPage() {
                       type="text"
                       required
                       value={guestInfo.state}
-                      onChange={(e) => handleInputChange("state", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("state", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="State"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       ZIP Code *
@@ -225,7 +236,9 @@ export default function CheckoutPage() {
                       type="text"
                       required
                       value={guestInfo.zipCode}
-                      onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("zipCode", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="ZIP Code"
                     />
@@ -233,60 +246,15 @@ export default function CheckoutPage() {
                 </div>
               </div>
             </div>
-
-            {/* <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-medium text-gray-900 mb-6 flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Payment Method
-              </h2>
-              
-              <div className="space-y-3">
-                <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="card"
-                    checked={guestInfo.paymentMethod === "card"}
-                    onChange={(e) => handleInputChange("paymentMethod", e.target.value)}
-                    className="mr-3"
-                  />
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  <span>Credit/Debit Card</span>
-                </label>
-                
-                <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="upi"
-                    checked={guestInfo.paymentMethod === "upi"}
-                    onChange={(e) => handleInputChange("paymentMethod", e.target.value)}
-                    className="mr-3"
-                  />
-                  <Phone className="w-5 h-5 mr-2" />
-                  <span>UPI Payment</span>
-                </label>
-                
-                <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={guestInfo.paymentMethod === "cod"}
-                    onChange={(e) => handleInputChange("paymentMethod", e.target.value)}
-                    className="mr-3"
-                  />
-                  <span>Cash on Delivery</span>
-                </label>
-              </div>
-            </div> */}
           </div>
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl p-6 shadow-sm sticky top-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Order Summary
+              </h3>
+
               {/* Cart Items */}
               <div className="space-y-3 mb-6">
                 {cartItems.map((item) => (
@@ -302,7 +270,9 @@ export default function CheckoutPage() {
                       <h4 className="text-sm font-medium text-gray-900 truncate">
                         {item.name}
                       </h4>
-                      <p className="text-sm text-gray-600">₹{item.price} × {item.quantity}</p>
+                      <p className="text-sm text-gray-600">
+                        ₹{item.price} × {item.quantity}
+                      </p>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
                       ₹{(item.price * item.quantity).toLocaleString()}
@@ -315,7 +285,9 @@ export default function CheckoutPage() {
               <div className="space-y-2 mb-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">₹{subtotal.toLocaleString()}</span>
+                  <span className="font-medium">
+                    ₹{subtotal.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Shipping</span>
@@ -339,15 +311,15 @@ export default function CheckoutPage() {
               >
                 {loading ? "Processing..." : "Place Order"}
               </button> */}
-              <RazorpayCheckoutButton  amountRupees={total} />
-              
+              <RazorpayCheckoutButton
+                amountRupees={total}
+                // guestInfo={guestInfo}
+                // items={cartItems}
+              />
+
               <p className="text-xs text-gray-500 text-center mt-3">
                 By placing this order, you agree to our terms and conditions
               </p>
-
-           
-             
-
             </div>
           </div>
         </form>
@@ -355,4 +327,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

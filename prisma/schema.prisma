@@ -2,7 +2,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,13 +11,13 @@ model Products {
   id          String   @id @default(cuid())
   name        String
   description String
-  slug        String   @unique 
+  slug        String   @unique
   price       Float
   discount    Float?
   featured    Boolean  @default(false)
   rating      Float    @default(0)
   units       Int      @default(5)
-  category  String
+  category    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -25,55 +25,64 @@ model Products {
 }
 
 model ProductsImage {
-  id          String  @id @default(cuid())
-  productId   String
-  imageUrl    String
-  product Products @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
 
 model GuestOrder {
-  id            String   @id @default(cuid())
-  orderNumber   String   @unique @default(cuid())
-  
+  id          String @id @default(cuid())
+  orderNumber String @unique @default(cuid())
+
   // Guest Information
-  guestName     String
-  guestEmail    String
-  guestPhone    String
-  guestAddress  String
-  guestCity     String
-  guestState    String
-  guestZipCode  String
-  
+  guestName    String
+  guestEmail   String
+  guestPhone   String
+  guestAddress String
+  guestCity    String
+  guestState   String
+  guestZipCode String
+
   // Order Details
   subtotal      Float
   shipping      Float
   total         Float
-  paymentMethod String  @default("upi") // "card", "upi", "cod"
-  status        String   @default("pending") // "pending", "confirmed", "shipped", "delivered", "cancelled"
-  
+  currency      String @default("INR")
+  paymentMethod String @default("online") // 
+  status        String @default("pending") // "pending", "confirmed", "shipped", "delivered", "cancelled"
+
+  //payment metadata for razorpay
+  paymentStatus     String    @default("pending")
+  razorpayOrderId   String?   @unique
+  razorpayPaymentId String?   @unique
+  razorpaySignature String?
+  receipt           String    @unique @default(cuid())
+  paidAt            DateTime?
+
   // Items
-  items         GuestOrderItem[]
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  items GuestOrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GuestOrderItem {
-  id            String     @id @default(cuid())
-  orderId       String
-  order         GuestOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+  id      String     @id @default(cuid())
+  orderId String
+  order   GuestOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   // Product snapshot (in case product details change later)
-  productId     String
-  productSlug   String
-  productName   String
-  productPrice  Float
-  productImage  String
-  quantity      Int
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  productId    String
+  productSlug  String
+  productName  String
+  productPrice Float
+  productImage String
+  quantity     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

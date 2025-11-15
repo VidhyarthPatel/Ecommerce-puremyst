@@ -1,28 +1,29 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import posterImg from "@/assets/poster.jpeg";
 
 const posters = [
-  { 
-    id: 1, 
-    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+  {
+    id: 1,
+    src: posterImg,
     alt: "Advanced Water Purification",
     title: "Pure Water, Healthy Life",
-    subtitle: "Advanced RO+UV+UF Technology"
+    subtitle: "Advanced RO+UV+UF Technology",
   },
-  { 
-    id: 2, 
-    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+  {
+    id: 2,
+    src: posterImg,
     alt: "Mineral Protection",
     title: "Preserve Essential Minerals",
-    subtitle: "TDS Controller for Healthy Water"
+    subtitle: "TDS Controller for Healthy Water",
   },
-  { 
-    id: 3, 
-    src: "https://www.kent.co.in/images/banners/water-banner.jpg", 
+  {
+    id: 3,
+    src: posterImg,
     alt: "Smart Purification",
     title: "Smart Water Solutions",
-    subtitle: "IoT Enabled Purification Systems"
+    subtitle: "IoT Enabled Purification Systems",
   },
 ];
 
@@ -52,25 +53,25 @@ export default function PosterSlider() {
         className="flex transition-transform duration-1000 ease-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {posters.map((poster) => (
+        {posters.map((slide) => (
           <div
-            key={poster.id}
+            key={slide.id}
             className="w-full flex-shrink-0 relative h-[500px] md:h-[700px]"
           >
             <img
-              src={poster.src}
-              alt={poster.alt}
+              src={slide.src.src}
+              alt={slide.alt}
               className="w-full h-full object-cover"
             />
-            
+
             {/* Text Overlay */}
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
               <div className="text-center text-white max-w-2xl px-4">
                 <h1 className="text-4xl md:text-6xl font-light mb-4 tracking-tight">
-                  {poster.title}
+                  {slide.title}
                 </h1>
                 <p className="text-xl md:text-2xl font-light text-gray-100">
-                  {poster.subtitle}
+                  {slide.subtitle}
                 </p>
               </div>
             </div>
@@ -81,6 +82,7 @@ export default function PosterSlider() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
+        aria-label="Previous slide"
         className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 backdrop-blur-sm"
       >
         <ChevronLeft size={28} />
@@ -88,6 +90,7 @@ export default function PosterSlider() {
 
       <button
         onClick={nextSlide}
+        aria-label="Next slide"
         className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 backdrop-blur-sm"
       >
         <ChevronRight size={28} />
@@ -99,10 +102,11 @@ export default function PosterSlider() {
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              current === index 
-                ? "bg-white w-8" 
-                : "bg-white/50 hover:bg-white/80"
+            aria-label={`Go to slide ${index + 1}`}
+            className={`rounded-full transition-all duration-300 px-2 py-1 ${
+              current === index
+                ? "bg-white w-8 h-2"
+                : "bg-white/50 hover:bg-white/80 w-2 h-2"
             }`}
           />
         ))}
