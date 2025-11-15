@@ -45,6 +45,56 @@ const razorpay = new Razorpay({
   key_secret: RAZORPAY_KEY_SECRET ?? "",
 });
 
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
+    const perPage = Math.min(100, Math.max(1, Number(url.searchParams.get("perPage") ?? 10)));
+    const status = (url.searchParams.get("status") ?? "all").toLowerCase();
+    const search = (url.searchParams.get("search") ?? "").trim();
+
+    const where: any = {};
+
+    if (status !== "all") {
+      where.status = status;
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      where.OR = [
+        { orderNumber: { contains: q, mode: "insensitive" } },
+        { guestName: { contains: q, mode: "insensitive" } },
+        { guestEmail: { contains: q, mode: "insensitive" } },
+      ];
+    }
+
+    const [total, orders] = await Promise.all([
+      prisma.guestOrder.count({ where }),
+      prisma.guestOrder.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * perPage,
+        take: perPage,
+        include: { items: true },
+      }),
+    ]);
+
+    return NextResponse.json({
+      ok: true,
+      meta: {
+        total,
+        page,
+        perPage,
+        totalPages: Math.ceil(total / perPage),
+      },
+      data: orders,
+    });
+  } catch (err: any) {
+    console.error("orders.GET error:", err);
+    return NextResponse.json({ ok: false, error: "Failed to fetch orders" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

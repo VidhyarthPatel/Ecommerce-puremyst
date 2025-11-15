@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 
-type CartItem = {
+export type CartItem = {
   id: string;
-  slug: string;
+  slug?: string;
   name: string;
   price: number;
   quantity: number;
   imageUrl?: string;
 };
 
-type GuestInfo = {
+export type GuestInfo = {
   name: string;
   email: string;
   phone: string;
@@ -21,30 +21,31 @@ type GuestInfo = {
   zipCode: string;
 };
 
+type Props = {
+  amountRupees: number;
+  guestInfo: GuestInfo;
+  items: CartItem[];
+  shippingRupees?: number;
+};
+
 export default function RazorpayCheckoutButton({
   amountRupees,
   guestInfo,
   items,
-}: {
-  amountRupees: number; // rupees (e.g., 499)
-  guestInfo: GuestInfo;
-  items: CartItem[];
-}) {
+  shippingRupees,
+}: Props) {
   const [loading, setLoading] = useState(false);
 
-  // ensure razorpay script loaded
-  const loadRazorpayScript = (): Promise<boolean> => {
-    return new Promise((res) => {
+  const loadRazorpayScript = (): Promise<boolean> =>
+    new Promise((res) => {
       if (typeof window === "undefined") return res(false);
       if ((window as any).Razorpay) return res(true);
-
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => res(true);
       script.onerror = () => res(false);
       document.body.appendChild(script);
     });
-  };
 
   const handleCheckout = async () => {
     if (!guestInfo.name || !guestInfo.phone || !guestInfo.address) {
@@ -57,7 +58,6 @@ export default function RazorpayCheckoutButton({
       const ok = await loadRazorpayScript();
       if (!ok) throw new Error("Unable to load Razorpay SDK");
 
-      // Map items to the shape expected by server
       const payload = {
         customer: {
           name: guestInfo.name,
@@ -70,17 +70,16 @@ export default function RazorpayCheckoutButton({
         },
         items: items.map((it) => ({
           productId: it.id,
-          productSlug: it.slug,
+          productSlug: it.slug ?? "",
           productName: it.name,
-          productPrice: it.price, // rupees (server will convert to paise)
+          productPrice: it.price, // rupees - server will compute paise
           productImage: it.imageUrl ?? "",
           quantity: it.quantity,
         })),
-        // Optional: you may send shippingRupees if your server accepts it
+        shippingRupees: typeof shippingRupees === "number" ? shippingRupees : undefined,
       };
 
-      // CREATE ORDER (server: create DB row + Razorpay order)
-      const createResp = await fetch("/api/create-order", {
+      const createResp = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -92,16 +91,14 @@ export default function RazorpayCheckoutButton({
         throw new Error(createJson.error || "Failed to create order");
       }
 
-      const { razorpayOrderId, amountPaise, currency, guestOrderId, key } =
-        createJson;
+      const { razorpayOrderId, amountPaise, currency, guestOrderId, key } = createJson;
 
       if (!razorpayOrderId || !amountPaise || !key) {
         throw new Error("Invalid create-order response");
       }
 
-      // Open Razorpay Checkout
       const options = {
-        key, // RAZORPAY_KEY_ID from server
+        key,
         amount: amountPaise,
         currency: currency ?? "INR",
         name: "PureMyst",
@@ -113,9 +110,7 @@ export default function RazorpayCheckoutButton({
           contact: guestInfo.phone,
         },
         handler: async function (response: any) {
-          // response: { razorpay_payment_id, razorpay_order_id, razorpay_signature }
           try {
-            // Verify payment on server
             const verifyResp = await fetch("/api/verify-payment", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -135,15 +130,11 @@ export default function RazorpayCheckoutButton({
               return;
             }
 
-            // Success: clear cart and redirect to success page
             try {
               localStorage.removeItem("ecommerce_cart");
               window.dispatchEvent(new Event("cartUpdated"));
-            } catch (e) {
-              // ignore
-            }
+            } catch (e) {}
 
-            // redirect to order confirmation — use guestOrderId if returned
             const successOrderId = verifyJson.guestOrderId ?? guestOrderId;
             if (successOrderId) {
               window.location.href = `/order-confirmation/${successOrderId}`;
@@ -157,7 +148,6 @@ export default function RazorpayCheckoutButton({
         },
         modal: {
           ondismiss: function () {
-            // Optional: handle user dismissed checkout
             console.log("Razorpay modal closed");
           },
         },
