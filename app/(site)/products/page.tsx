@@ -1,106 +1,207 @@
-import Link from "next/link";
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
+import FilterSidebar from "@/components/catalog/FilterSidebar";
+import SortControls from "@/components/catalog/SortControls";
+import ProductGrid from "@/components/catalog/ProductGrid";
 
-export const dynamic = "force-dynamic";
+// Type definition matching the API response
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  price: number;
+  discount?: number | null;
+  featured: boolean;
+  rating: number;
+  units: number;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+  ProductsImage?: { imageUrl: string }[];
+};
 
-async function getProducts() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
-      cache: "no-store",
-    });
+export default function ProductsPage() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 50000]);
+  const [minRating, setMinRating] = useState<number | null>(null);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [sortBy, setSortBy] = useState("popularity");
 
-    if (!res.ok) throw new Error("Failed to fetch products");
-    return res.json();
-  } catch (error) {
-    console.error("❌ Error fetching products:", error);
-    return [];
-  }
-}
+  React.useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data: Product[] = await res.json();
 
-export default async function ProductsPage() {
-  const products = await getProducts();
+        // Map API data to ProductCard props
+        const mappedProducts = data.map(product => ({
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          description: product.description || "",
+          price: product.price,
+          originalPrice: product.discount ? Math.round(product.price / (1 - product.discount / 100)) : undefined,
+          rating: product.rating || 0,
+          reviewsCount: Math.floor(Math.random() * 50) + 10, // Mock review count as it's not in API
+          imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+          inStock: product.units > 0,
+          tags: [
+            product.featured ? "Featured" : null,
+            product.discount ? "Sale" : null,
+            product.units < 5 && product.units > 0 ? "Low Stock" : null
+          ].filter(Boolean) as string[],
+          category: product.category, // Add category for filtering
+        }));
 
-  if (products.length === 0) {
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to load products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = React.useMemo(() => {
+    let result = [...products];
+
+    // Filter by Category
+    if (selectedCategories.length > 0) {
+      result = result.filter(p => selectedCategories.includes(p.category));
+    }
+
+    // Filter by Price
+    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+
+    // Filter by Rating
+    if (minRating) {
+      result = result.filter(p => p.rating >= minRating);
+    }
+
+    // Filter by Stock
+    if (inStockOnly) {
+      result = result.filter(p => p.inStock);
+    }
+
+    // Sort
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        // Assuming newer items are at the end or have a date, but for now just reverse
+        result.reverse();
+        break;
+      case "popularity":
+      default:
+        // Default sort (usually by ID or whatever API returns)
+        break;
+    }
+
+    return result;
+  }, [products, selectedCategories, priceRange, minRating, inStockOnly, sortBy]);
+
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen bg-white dark:bg-ocean-900 pt-24 pb-12 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">💧</span>
-          </div>
-          <p className="text-gray-500 text-lg">No products available</p>
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#00AEEF] transition-colors"
+          >
+            Retry
+          </button>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-light text-gray-900 mb-3">Water Purifiers</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">Advanced purification technology for clean, safe drinking water</p>
-        </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product: any) => {
-            const firstImage =
-              product.ProductsImage?.[0]?.imageUrl ?? "/placeholder.png";
-
-            return (
-              <Link
-                key={product.id}
-                href={`/products/${product.slug}`}
-                className="group"
-              >
-                <div className="bg-white border border-gray-100 rounded-xl hover:border-gray-200 transition-all duration-300 overflow-hidden flex flex-col h-full">
-                  {/* Image Container */}
-                  <div className="relative aspect-square bg-gray-50 flex items-center justify-center p-6">
-                    <img
-                      src={firstImage}
-                      alt={product.name}
-                      className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-110"
-                    />
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="font-medium text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
-                      {product.name}
-                    </h3>
-                    
-                    <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-1">
-                      {product.description || "Premium water purification system"}
-                    </p>
-
-                    <div className="mt-auto space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-semibold text-gray-900">
-                          ₹{product.price}
-                        </span>
-                        {product.rating && (
-                          <div className="flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-full">
-                            <span className="text-blue-600 text-sm">⭐</span>
-                            <span className="text-blue-600 text-sm font-medium">{product.rating}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* View Details Button */}
-                      <button className="w-full mt-3 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 group-hover:bg-blue-50 group-hover:text-blue-600">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+    <main className="min-h-screen bg-white dark:bg-ocean-900 pt-24 pb-12">
+      {/* Page Header */}
+      <div className="bg-[#0A2540] text-white py-12 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="font-poppins text-3xl md:text-4xl font-bold mb-4">
+            Our Products
+          </h1>
+          <p className="text-gray-300 max-w-2xl mx-auto text-lg">
+            Advanced purification technology for clean, safe, and healthy drinking water.
+            Explore our range of purifiers and accessories.
+          </p>
         </div>
       </div>
-    </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="lg:w-64 flex-shrink-0">
+            <FilterSidebar
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              minRating={minRating}
+              setMinRating={setMinRating}
+              inStockOnly={inStockOnly}
+              setInStockOnly={setInStockOnly}
+            />
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <SortControls
+              onFilterClick={() => setIsFilterOpen(true)}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              totalProducts={products.length}
+              filteredCount={filteredProducts.length}
+            />
+
+            {filteredProducts.length > 0 ? (
+              <ProductGrid
+                products={filteredProducts}
+                viewMode={viewMode}
+                isLoading={loading}
+              />
+            ) : (
+              !loading && (
+                <div className="text-center py-20">
+                  <p className="text-gray-500 text-lg">No products match your filters.</p>
+                  <button
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setPriceRange([0, 50000]);
+                      setMinRating(null);
+                      setInStockOnly(false);
+                    }}
+                    className="mt-4 text-[#00AEEF] hover:underline"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

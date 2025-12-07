@@ -1,205 +1,114 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Loader2, Check } from "lucide-react";
+import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
+import ProductShowcase from "@/components/ProductShowcase";
+import ProductFeatures from "@/components/ProductFeatures";
+import ProductSpecs from "@/components/ProductSpecs";
+import ProductReviews from "@/components/ProductReviews";
+import ProductFAQ from "@/components/ProductFAQ";
+import RelatedProducts from "@/components/RelatedProducts";
+
+// Sample data for sections that might not be in the database yet
+const defaultSpecs = [
+  { label: "Filter Type", value: "Multi-stage Purification" },
+  { label: "Technology", value: "RO + UV + UF" },
+  { label: "Capacity", value: "7-10 Liters" },
+  { label: "Power Consumption", value: "60W" },
+  { label: "Warranty", value: "1 Year" },
+  { label: "Dimensions", value: "Standard" },
+];
+
+const defaultReviews = [
+  {
+    id: 1,
+    name: "Satisfied Customer",
+    rating: 5,
+    date: "2 weeks ago",
+    comment: "Excellent product! Highly recommended for quality and performance.",
+    verified: true,
+  },
+  {
+    id: 2,
+    name: "Happy User",
+    rating: 4,
+    date: "1 month ago",
+    comment: "Good quality product. Value for money.",
+    verified: true,
+  },
+];
+
+const defaultFAQs = [
+  {
+    question: "How long is the warranty period?",
+    answer: "This product comes with a 1-year manufacturer warranty covering all manufacturing defects.",
+  },
+  {
+    question: "Is installation included?",
+    answer: "Installation services may be available in select areas. Please contact customer support for details.",
+  },
+  {
+    question: "What is the return policy?",
+    answer: "We offer a 7-day return policy for unopened products in original packaging.",
+  },
+];
 
 export default function ProductDetailClient({ product }: { product: any }) {
-  const [previewImage, setPreviewImage] = useState(
-    product.ProductsImage?.[0]?.imageUrl || "/placeholder.png"
-  );
-  const [addedToCart, setAddedToCart] = useState(false);
+  const { addToCart, loading } = useCart();
   const [quantity, setQuantity] = useState(1);
 
-  const { addToCart, loading, hasItem } = useCart();
-  const imgRef = useRef<HTMLDivElement>(null);
-
-  const handleAddToCart = async () => {
-    try {
-      await addToCart({
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
-      }, quantity);
-
-      setAddedToCart(true);
-      setTimeout(() => setAddedToCart(false), 2000);
-    } catch (err) {
-      console.error("Add to cart error:", err);
-      alert("Failed to add product to cart. Please try again.");
-    }
+  // Transform product data to match ProductShowcase interface
+  const productData = {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    description: product.description || "Premium quality product from PureMyst",
+    price: product.price,
+    originalPrice: product.originalPrice || null,
+    images: product.ProductsImage?.map((img: any) => img.imageUrl) || ["/placeholder.png"],
+    highlights: product.features || [
+      "Premium quality materials",
+      "Easy installation",
+      "Long-lasting performance",
+      "Certified and tested",
+      "1-year warranty included",
+    ],
+    inStock: product.units > 0,
   };
 
-  const handleBuyNow = async () => {
-    try {
-      await addToCart({
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
-      }, quantity);
-
-      window.location.href = "/checkout"; // redirect to checkout
-    } catch (err) {
-      console.error("Buy now error:", err);
-      alert("Failed to proceed with purchase. Please try again.");
-    }
-  };
+  // Get related products (you can fetch these from API later)
+  const relatedProducts = [
+    {
+      id: "1",
+      name: "Related Product 1",
+      price: 999,
+      image: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+      rating: 4.5,
+      slug: "related-1",
+    },
+    {
+      id: "2",
+      name: "Related Product 2",
+      price: 1299,
+      originalPrice: 1999,
+      image: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+      rating: 4.7,
+      slug: "related-2",
+    },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-        {/* Image Gallery */}
-        <div className="space-y-6">
-          <div
-            ref={imgRef}
-            className="aspect-square bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center p-8"
-          >
-            <img
-              src={previewImage}
-              alt={product.name}
-              className="w-full h-full object-contain transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-          <div className="flex gap-3 justify-center">
-            {product.ProductsImage?.map((img: any, i: number) => (
-              <button
-                key={i}
-                onClick={() => setPreviewImage(img.imageUrl)}
-                className={`w-16 h-16 rounded-lg border-2 overflow-hidden ${
-                  previewImage === img.imageUrl
-                    ? "border-blue-500 shadow-sm"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <img
-                  src={img.imageUrl}
-                  alt={`${product.name} ${i + 1}`}
-                  className="w-full h-full object-cover cursor-pointer"
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Product Details */}
-        <div className="lg:py-4">
-          <h1 className="text-3xl lg:text-4xl font-light text-gray-900 mb-3">
-            {product.name}
-          </h1>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex items-center bg-blue-50 px-2 py-1 rounded-full">
-              <span className="text-blue-600 text-sm font-medium">
-                ⭐ {product.rating || "4.5"}
-              </span>
-            </div>
-            <span className="text-gray-500 text-sm">Based on customer reviews</span>
-          </div>
-
-          <div className="mb-8 p-4 bg-gray-50 rounded-xl">
-            <div className="flex items-baseline gap-3 mb-2">
-              <span className="text-3xl font-semibold text-gray-900">₹{product.price}</span>
-              {product.originalPrice && (
-                <>
-                  <span className="text-gray-500 line-through">₹{product.originalPrice}</span>
-                  <span className="text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
-                    {product.discountPercentage || "62%"} OFF
-                  </span>
-                </>
-              )}
-            </div>
-            <p className="text-sm text-gray-600">Inclusive of all taxes</p>
-          </div>
-
-          {/* Quantity Selector */}
-          <div className="mb-4 flex items-center gap-3">
-            <span>Quantity:</span>
-            <button
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              className="px-3 py-1 bg-gray-200 rounded"
-            >
-              -
-            </button>
-            <span>{quantity}</span>
-            <button
-              onClick={() => setQuantity(q => q + 1)}
-              className="px-3 py-1 bg-gray-200 rounded"
-            >
-              +
-            </button>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-4 mb-8">
-            <button
-              onClick={handleAddToCart}
-              disabled={loading || addedToCart}
-              className={`w-full py-4 rounded-xl font-medium flex items-center justify-center gap-2 ${
-                addedToCart
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-900 text-white hover:bg-gray-800"
-              }`}
-            >
-              {loading
-                ? "Adding..."
-                : addedToCart
-                ? "Added to Cart"
-                : "Add to Cart"}
-            </button>
-
-            <button
-              onClick={handleBuyNow}
-              disabled={loading}
-              className="w-full py-4 rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Buy Now
-            </button>
-          </div>
-
-          {/* Features */}
-          <div className="border-t border-gray-100 pt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Key Features</h3>
-            <div className="grid grid-cols-1 gap-3">
-              {(product.features?.length ? product.features : [
-                "7-stage purification process",
-                "RO + UV + UF technology",
-                "Smart TDS controller",
-                "Energy efficient operation",
-                "Sleek modern design"
-              ]).map((feature: string, i: number) => (
-                <div key={i} className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="border-t border-gray-100 pt-8 mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Description</h3>
-            <p className="text-gray-600 leading-relaxed">{product.description}</p>
-          </div>
-
-          {/* Specifications */}
-          {product.specifications && (
-            <div className="border-t border-gray-100 pt-8 mt-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Specifications</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-gray-600">{key}:</span>
-                    <span className="text-gray-900 font-medium">{value as string}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <main className="min-h-screen bg-white dark:bg-ocean-900 mt-20">
+      <ProductShowcase product={productData} />
+      <ProductFeatures />
+      <ProductSpecs specs={product.specifications || defaultSpecs} />
+      <ProductReviews
+        reviews={product.reviews || defaultReviews}
+        averageRating={product.rating || 4.5}
+        totalReviews={product.reviewCount || 50}
+      />
+      <ProductFAQ faqs={product.faqs || defaultFAQs} />
+      <RelatedProducts products={relatedProducts} />
+    </main>
   );
 }

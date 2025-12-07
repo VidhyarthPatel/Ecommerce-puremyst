@@ -15,50 +15,93 @@ export default function NavClient() {
     setIsMounted(true);
   }, []);
 
-  // Listen for cart updates to refresh cart count
   useEffect(() => {
     const handleCartUpdated = () => {
-      console.log('Cart updated event received in NavClient');
       refreshCart();
     };
-    
     window.addEventListener("cartUpdated", handleCartUpdated);
-    
-    return () => {
-      window.removeEventListener("cartUpdated", handleCartUpdated);
-    };
+    return () => window.removeEventListener("cartUpdated", handleCartUpdated);
   }, [refreshCart]);
+
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [menuOpen]);
 
   return (
     <>
-      <div className="flex items-center space-x-4">
-        {/* Search Button - Mobile */}
-        <button onClick={() => setSearchOpen(true)} className="lg:hidden p-2 text-gray-600 hover:text-gray-900 transition-all duration-200 hover:scale-110 active:scale-95">
-          <Search size={20} />
-        </button>
-
+      <div className="flex items-center space-x-2 md:space-x-6">
         {/* Search Bar - Desktop */}
-        <div className="hidden lg:block relative">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input type="text" placeholder="Search products..." className="pl-10 pr-4 py-2 w-64 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-all duration-300 focus:scale-105 focus:shadow-sm" />
+        <div className="hidden lg:flex items-center relative group">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="pl-10 pr-4 py-2 w-48 focus:w-64 bg-gray-100/50 dark:bg-white/5 border border-transparent focus:border-teal-500/50 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all duration-300"
+          />
         </div>
 
-        {/* Icons */}
-        <div className="flex items-center space-x-3">
-          {/* Cart */}
-          <Link href="/cart" className="relative p-2 text-gray-600 hover:text-gray-900 transition-all duration-200 hover:scale-110 active:scale-95 group">
-            <ShoppingBag size={20} className="transition-all duration-200 group-hover:stroke-2" />
-            {cartCount > 0 && isMounted && (
-              <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-4 h-4 flex items-center justify-center transition-all duration-300 animate-bounce-once hover:scale-125 hover:bg-gray-800">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+        {/* Search Icon - Mobile */}
+        <button
+          onClick={() => setSearchOpen(!searchOpen)}
+          className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+        >
+          <Search size={22} />
+        </button>
 
-          {/* Mobile Menu */}
-          <button onClick={() => setMenuOpen(true)} className="lg:hidden p-2 text-gray-600 hover:text-gray-900 transition-all duration-200 hover:scale-110 active:scale-95">
-            <Menu size={20} />
-          </button>
+        {/* Cart */}
+        <Link
+          href="/cart"
+          className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors group"
+        >
+          <ShoppingBag size={22} className="group-hover:scale-110 transition-transform duration-200" />
+          {cartCount > 0 && isMounted && (
+            <span className="absolute -top-0.5 -right-0.5 bg-teal-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-bounce-once shadow-sm ring-2 ring-white dark:ring-ocean-900">
+              {cartCount}
+            </span>
+          )}
+        </Link>
+
+        {/* Mobile Menu Toggle */}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+        >
+          <Menu size={24} />
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`fixed inset-0 z-[60] bg-white dark:bg-ocean-900 transition-transform duration-300 ease-in-out lg:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+            <span className="text-lg font-bold text-gray-900 dark:text-white">Menu</span>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="space-y-4">
+              <MobileNavLink href="/" label="Home" onClick={() => setMenuOpen(false)} />
+              <MobileNavLink href="/products" label="Products" onClick={() => setMenuOpen(false)} />
+              <MobileNavLink href="/about" label="About Us" onClick={() => setMenuOpen(false)} />
+              <MobileNavLink href="/contact" label="Contact" onClick={() => setMenuOpen(false)} />
+              <MobileNavLink href="/sale" label="Sale" highlight onClick={() => setMenuOpen(false)} />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -68,5 +111,20 @@ export default function NavClient() {
         .animate-bounce-once { animation: bounce-once 0.5s ease-in-out; }
       `}</style>
     </>
+  );
+}
+
+function MobileNavLink({ href, label, highlight, onClick }: { href: string, label: string, highlight?: boolean, onClick: () => void }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`block text-2xl font-light tracking-tight ${highlight
+          ? "text-red-500 font-normal"
+          : "text-gray-900 dark:text-white hover:text-teal-500"
+        }`}
+    >
+      {label}
+    </Link>
   );
 }

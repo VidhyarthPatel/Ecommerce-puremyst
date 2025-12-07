@@ -1,39 +1,71 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import z from "zod";
+import crypto from "crypto"
 
-type Body = {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-  customer?: { name?: string; email?: string; phone?: string; address?: string };
-};
+const VerificationSchema = z.object({
+  razorpay_payment_id: z.string().min(1),
+  razorpay_order_id: z.string().min(1),
+  razorpay_signature: z.string().min(1),
+  guestOrderId: z.string().min(1),
+})
+
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = (await req.json()) as Body;
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, customer } = body;
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  try{
+
+    if (!RAZORPAY_KEY_SECRET) {
+      throw new Error("Payment secret not configured");
     }
 
-    const key_secret = process.env.RAZORPAY_KEY_SECRET!;
-    const generated = crypto.createHmac("sha256", key_secret)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex");
+    const body = await req.json()
+    const parsed = VerificationSchema.safeParse(body)
 
-    if (generated !== razorpay_signature) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    if(!parsed.success) {
+      return NextResponse.json({ ok:false, error: "Invalid payload", issues: parsed.error.format() }, { status: 400 })
     }
 
-    // Payment is valid — update your DB:
-    // mark order (by razorpay_order_id) as paid and save razorpay_payment_id
-    // store customer info (customer.address etc) alongside the order
-    // optionally send confirmation email or SMS here
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, guestOrderId } = parsed.data;
 
-    return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    console.error("verify-payment error:", err);
-    return NextResponse.json({ error: err.message || "server error" }, { status: 500 });
+    const localOrder = await prisma.guestOrder.findUnique({
+      where: {id: guestOrderId},
+    })
+
+    if(!localOrder) {
+      return NextResponse.json({ ok:false, error: "Order not found"}, { status: 404 })
+    }
+
+    if(!localOrder.razorpayOrderId || localOrder.razorpayOrderId !== razorpay_order_id) {
+      return NextResponse.json({ ok:false, error: "Razorpay order mismatch" }, { status: 400 })
+    }
+
+    const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expectedSignature = crypto.createHmac("sha256", RAZORPAY_KEY_SECRET).update(payload).digest("hex")
+
+    const sigBuffer = Buffer.from(razorpay_signature, "utf8")
+    const expectedBuffer = Buffer.from(expectedSignature, "utf8")
+
+    if(sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)){
+      console.warn("Razorpay signature verification failed", { razorpay_order_id, razorpay_payment_id })
+      return NextResponse.json({ ok:false, error: "Invalid Signature" }, {status: 400});
+    }
+
+    const updated = await prisma.guestOrder.update({
+      where: {id: guestOrderId },
+      data: {
+        paymentStatus: "Paid",
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+        status: "confirmed",
+        paidAt: new Date()
+      },
+      include: { items: true },
+    });
+
+    return NextResponse.json({ ok: true, message: "Payment Verified", order: updated }, { status: 200 })
+    
+  }catch(err) {
+    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 })
   }
 }

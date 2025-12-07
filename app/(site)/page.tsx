@@ -1,14 +1,15 @@
 import AboutUs from "@/components/AboutUs";
-import Products from "@/components/BestSelling";
 import BestSelling from "@/components/BestSelling";
+import Features from "@/components/Features";
 import HeroSection from "@/components/HeroSection";
 
 export default function Home() {
   return (
-   <div className="font-sans">
-    <HeroSection/>
-    <BestSelling/>
-    <AboutUs/>
-   </div>
+    <main className="font-sans bg-white dark:bg-ocean-900 transition-colors duration-300">
+      <HeroSection />
+      <Features />
+      <BestSelling />
+      <AboutUs />
+    </main>
   );
 }

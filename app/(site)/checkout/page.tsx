@@ -5,7 +5,6 @@ import { useCart } from "@/hooks/use-cart";
 import { MapPin, User } from "lucide-react";
 import Link from "next/link";
 import RazorpayCheckoutButton from "@/components/RazorpayCheckoutButton";
-// import RazorpayCheckoutButton from "@/components/ui/RazorpayCheckoutButton";
 
 interface GuestInfo {
   name: string;
