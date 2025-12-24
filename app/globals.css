@@ -48,6 +48,8 @@
     --color-ocean-50: #f8fafc;
     --color-teal-500: #14b8a6;
     --color-teal-400: #2dd4bf;
+    --color-theme-blue: #1447E6;
+    --color-theme-blue-hover: #2366CC;
 }
 
 :root {

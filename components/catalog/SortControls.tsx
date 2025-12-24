@@ -26,7 +26,7 @@ export default function SortControls({
             {/* Mobile Filter Toggle */}
             <button
                 onClick={onFilterClick}
-                className="lg:hidden flex items-center gap-2 text-[#0A2540] dark:text-white font-medium"
+                className="lg:hidden flex items-center gap-2 text-theme-blue dark:text-white font-medium"
             >
                 <SlidersHorizontal className="w-5 h-5" />
                 Filters
@@ -34,7 +34,7 @@ export default function SortControls({
 
             {/* Results Count */}
             <p className="text-gray-600 dark:text-gray-400 text-sm hidden sm:block">
-                Showing <span className="font-semibold text-[#0A2540] dark:text-white">{filteredCount}</span> of <span className="font-semibold text-[#0A2540] dark:text-white">{totalProducts}</span> products
+                Showing <span className="font-semibold text-theme-blue dark:text-white">{filteredCount}</span> of <span className="font-semibold text-theme-blue dark:text-white">{totalProducts}</span> products
             </p>
 
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
@@ -44,7 +44,7 @@ export default function SortControls({
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-white dark:bg-ocean-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                        className="bg-white dark:bg-ocean-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue"
                     >
                         <option value="popularity">Popularity</option>
                         <option value="newest">Newest Arrivals</option>
@@ -58,7 +58,7 @@ export default function SortControls({
                     <button
                         onClick={() => setViewMode("grid")}
                         className={`p-2 rounded-md transition-colors ${viewMode === "grid"
-                            ? "bg-gray-100 dark:bg-ocean-800 text-[#00AEEF]"
+                            ? "bg-gray-100 dark:bg-ocean-800 text-theme-blue"
                             : "text-gray-400 hover:text-gray-600"
                             }`}
                         aria-label="Grid view"
@@ -68,7 +68,7 @@ export default function SortControls({
                     <button
                         onClick={() => setViewMode("list")}
                         className={`p-2 rounded-md transition-colors ${viewMode === "list"
-                            ? "bg-gray-100 dark:bg-ocean-800 text-[#00AEEF]"
+                            ? "bg-gray-100 dark:bg-ocean-800 text-theme-blue"
                             : "text-gray-400 hover:text-gray-600"
                             }`}
                         aria-label="List view"

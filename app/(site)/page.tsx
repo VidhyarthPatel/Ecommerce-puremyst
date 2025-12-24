@@ -1,15 +1,19 @@
 import AboutUs from "@/components/AboutUs";
-import BestSelling from "@/components/BestSelling";
 import Features from "@/components/Features";
-import HeroSection from "@/components/HeroSection";
+import HeroSectionNew from "@/components/HeroSectionNew";
+import NewArrivals from "@/components/NewArrivals";
+import SaleBanner from "@/components/SaleBanner";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export default function Home() {
   return (
     <main className="font-sans bg-white dark:bg-ocean-900 transition-colors duration-300">
-      <HeroSection />
+      <HeroSectionNew />
+      <NewArrivals />
+      <SaleBanner />
       <Features />
-      <BestSelling />
       <AboutUs />
+      <WhatsAppFloat />
     </main>
   );
 }

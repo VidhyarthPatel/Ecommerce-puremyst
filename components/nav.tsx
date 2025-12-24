@@ -69,10 +69,10 @@ export default function NavServer() {
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
     >
-      {/* Glassmorphism Background */}
-      <div className="absolute inset-0 bg-white/70 dark:bg-ocean-900/70 backdrop-blur-md border-b border-white/20 dark:border-white/5 shadow-sm" />
+      {/* Solid Background */}
+      <div className="absolute inset-0 bg-white dark:bg-blue-900 dark:border-blue-800 " />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div className="w-full px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link
@@ -94,23 +94,23 @@ export default function NavServer() {
                   <div className="relative">
                     <button
                       type="button"
-                      className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors duration-200 focus:outline-none group-hover:text-teal-600 dark:group-hover:text-teal-400"
+                      className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-theme-blue dark:hover:text-theme-blue transition-colors duration-200 focus:outline-none group-hover:text-theme-blue dark:group-hover:text-theme-blue"
                     >
                       {item.label}
                       <ChevronDown className="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
                     </button>
 
                     {/* Premium Dropdown */}
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-64 p-2 bg-white dark:bg-ocean-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top scale-95 group-hover:scale-100 z-50">
-                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-ocean-800 rotate-45 border-l border-t border-gray-100 dark:border-gray-700" />
-                      <div className="relative flex flex-col gap-1 bg-white dark:bg-ocean-800 rounded-xl overflow-hidden">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-64 p-2 bg-white dark:bg-blue-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top scale-95 group-hover:scale-100 z-50">
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-blue-800 rotate-45 border-l border-t border-gray-100 dark:border-gray-700" />
+                      <div className="relative flex flex-col gap-1 bg-white dark:bg-blue-800 rounded-xl overflow-hidden">
                         {item.dropdownItems?.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.label}
                             href={dropdownItem.href}
                             className={`px-4 py-3 text-sm rounded-lg transition-all duration-200 flex items-center justify-between group/item ${dropdownItem.highlight
-                              ? "bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold"
-                              : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-teal-600 dark:hover:text-teal-400"
+                              ? "bg-blue-50 dark:bg-blue-900/20 text-theme-blue dark:text-theme-blue font-semibold"
+                              : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-theme-blue dark:hover:text-theme-blue"
                               }`}
                           >
                             {dropdownItem.label}
@@ -125,12 +125,12 @@ export default function NavServer() {
                     href={item.href || "#"}
                     className={`relative text-sm font-medium transition-colors duration-200 ${item.highlight
                       ? "text-red-500 hover:text-red-600"
-                      : "text-gray-700 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
+                      : "text-gray-700 dark:text-gray-200 hover:text-theme-blue dark:hover:text-theme-blue"
                       }`}
                   >
                     {item.label}
                     {!item.highlight && (
-                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 transition-all duration-300 group-hover:w-full" />
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-theme-blue transition-all duration-300 group-hover:w-full" />
                     )}
                   </Link>
                 )}

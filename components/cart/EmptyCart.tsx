@@ -14,7 +14,7 @@ export default function EmptyCart() {
                 Your cart is empty
             </h2>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mb-8">
-                Looks like you haven't added anything to your cart yet. Explore our premium water purification products.
+                Looks like you haven&apos;t added anything to your cart yet. Explore our premium water purification products.
             </p>
 
             <Link
