@@ -1,14 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ShoppingBag, Menu, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Search, ShoppingBag, Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 
-export default function NavClient() {
+type DropdownItem = {
+  href: string;
+  label: string;
+  highlight?: boolean;
+};
+
+type NavItem = {
+  href?: string;
+  label: string;
+  dropdown?: boolean;
+  dropdownItems?: DropdownItem[];
+  highlight?: boolean;
+};
+
+export default function NavClient({ navItems }: { navItems: NavItem[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const { totalItems: cartCount, refreshCart } = useCart();
 
   useEffect(() => {
@@ -31,6 +47,10 @@ export default function NavClient() {
       document.body.style.overflow = "unset";
     }
   }, [menuOpen]);
+
+  const toggleAccordion = (label: string) => {
+    setExpandedItem(expandedItem === label ? null : label);
+  };
 
   return (
     <>
@@ -78,32 +98,77 @@ export default function NavClient() {
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div
-        className={`fixed inset-0 z-[60] bg-white dark:bg-blue-900 transition-transform duration-300 ease-in-out lg:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-      >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
-            <span className="text-lg font-bold text-gray-900 dark:text-white">Menu</span>
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-            >
-              <X size={24} />
-            </button>
-          </div>
+      {isMounted &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[9999] bg-white dark:bg-blue-900 transition-transform duration-300 ease-in-out lg:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
+              }`}
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">Menu</span>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="space-y-4">
-              <MobileNavLink href="/" label="Home" onClick={() => setMenuOpen(false)} />
-              <MobileNavLink href="/products" label="Products" onClick={() => setMenuOpen(false)} />
-              <MobileNavLink href="/about" label="About Us" onClick={() => setMenuOpen(false)} />
-              <MobileNavLink href="/contact" label="Contact" onClick={() => setMenuOpen(false)} />
-              <MobileNavLink href="/sale" label="Sale" highlight onClick={() => setMenuOpen(false)} />
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="space-y-4">
+                  {navItems.map((item) => (
+                    <div key={item.label} className="border-b border-gray-100 dark:border-gray-800 pb-2 last:border-0">
+                      {item.dropdown ? (
+                        <div>
+                          <button
+                            onClick={() => toggleAccordion(item.label)}
+                            className="flex items-center justify-between w-full text-2xl font-light tracking-tight text-gray-900 dark:text-white hover:text-theme-blue py-2"
+                          >
+                            {item.label}
+                            {expandedItem === item.label ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          </button>
+                          <div
+                            className={`overflow-hidden transition-all duration-300 ${expandedItem === item.label ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
+                              }`}
+                          >
+                            <div className="flex flex-col space-y-3 pl-4 border-l-2 border-gray-100 dark:border-gray-700 ml-1">
+                              {item.dropdownItems?.map((subItem) => (
+                                <Link
+                                  key={subItem.label}
+                                  href={subItem.href}
+                                  onClick={() => setMenuOpen(false)}
+                                  className={`text-lg font-light ${subItem.highlight
+                                    ? "text-theme-blue font-normal"
+                                    : "text-gray-600 dark:text-gray-300 hover:text-theme-blue"
+                                    }`}
+                                >
+                                  {subItem.label}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Link
+                          href={item.href || "#"}
+                          onClick={() => setMenuOpen(false)}
+                          className={`block text-2xl font-light tracking-tight py-2 ${item.highlight
+                            ? "text-red-500 font-normal"
+                            : "text-gray-900 dark:text-white hover:text-theme-blue"
+                            }`}
+                        >
+                          {item.label}
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </div>,
+          document.body
+        )}
 
       {/* Animations */}
       <style jsx>{`
@@ -114,17 +179,3 @@ export default function NavClient() {
   );
 }
 
-function MobileNavLink({ href, label, highlight, onClick }: { href: string, label: string, highlight?: boolean, onClick: () => void }) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`block text-2xl font-light tracking-tight ${highlight
-        ? "text-red-500 font-normal"
-        : "text-gray-900 dark:text-white hover:text-theme-blue"
-        }`}
-    >
-      {label}
-    </Link>
-  );
-}

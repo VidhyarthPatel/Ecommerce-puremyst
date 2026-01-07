@@ -41,7 +41,7 @@ export default function HeroSectionNew() {
                             </h3>
 
                             <Link
-                                href="/shower-and-tap-filters"
+                                href="/washing-machine-cleaner"
                                 className="inline-flex items-center px-6 py-3 bg-white text-theme-blue rounded-full font-semibold text-sm hover:bg-blue-50 transition-colors w-fit relative z-20 shadow-lg"
                             >
                                 Explore <ArrowRight className="ml-2 w-4 h-4" />
@@ -68,7 +68,7 @@ export default function HeroSectionNew() {
                                 <h3 className="text-xl md:text-2xl font-light text-white/90 relative z-20 drop-shadow-md">
                                     Cartridges
                                 </h3>
-                                <Link href="/replacement-cartridges" className="absolute inset-0 z-30" aria-label="Water Filter Cartridges" />
+                                <Link href="/ro-water-purifier" className="absolute inset-0 z-30" aria-label="Water Filter Cartridges" />
                             </div>
                         </div>
 
@@ -89,7 +89,7 @@ export default function HeroSectionNew() {
                                 <h3 className="text-xl md:text-2xl font-light text-white/90 relative z-20 drop-shadow-md">
                                     Filters
                                 </h3>
-                                <Link href="/other-filters" className="absolute inset-0 z-30" aria-label="Other Filters" />
+                                <Link href="/products" className="absolute inset-0 z-30" aria-label="Other Filters" />
                             </div>
                         </div>
                     </div>

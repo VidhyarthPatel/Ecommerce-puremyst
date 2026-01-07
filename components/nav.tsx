@@ -87,7 +87,7 @@ export default function NavServer() {
           </Link>
 
           {/* Desktop Navigation */}
-          <ul className="hidden md:flex items-center space-x-10">
+          <ul className="hidden lg:flex items-center space-x-10">
             {navItems.map((item) => (
               <li key={item.label} className="relative group">
                 {item.dropdown ? (
@@ -139,7 +139,7 @@ export default function NavServer() {
           </ul>
 
           {/* Client-side Interactive Components */}
-          <NavClient />
+          <NavClient navItems={navItems} />
         </div>
       </div>
     </nav>
