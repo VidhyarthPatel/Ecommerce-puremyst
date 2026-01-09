@@ -1,21 +1,17 @@
 import ProductDetailClient from "./ProductDetailClient";
-
-async function getProduct(slug: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${slug}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) return null;
-  return res.json();
-}
+import { prisma } from "@/lib/prisma";
 
 export default async function ProductDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>; // ✅ Change to Promise
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params; // ✅ Await params first, then destructure
-  const product = await getProduct(slug);
+  const { slug } = await params;
+
+  const product = await prisma.products.findUnique({
+    where: { slug },
+    include: { ProductsImage: true },
+  });
 
   if (!product) {
     return (
