@@ -18,14 +18,14 @@ export default function TrustedBy() {
                     <Image
                         src={Amazon}
                         alt="Amazon"
-                        className="h-25 w-auto object-contain"
+                        className="h-16 md:h-24 w-auto object-contain"
                     />
 
                     {/* Flipkart */}
                     <Image
                         src={Flipkart}
                         alt="Flipkart"
-                        className="h-52 w-auto object-contain"
+                        className="h-24 md:h-40 w-auto object-contain"
                     />
                 </div>
             </div>

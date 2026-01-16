@@ -121,14 +121,14 @@ export default function Testimonials() {
                 {/* arrows */}
                 <button
                     onClick={prev}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10 hidden md:block"
                 >
                     <ChevronLeft className="w-6 h-6" />
                 </button>
 
                 <button
                     onClick={next}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10 hidden md:block"
                 >
                     <ChevronRight className="w-6 h-6" />
                 </button>

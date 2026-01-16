@@ -48,7 +48,7 @@ export default function PosterSlider() {
     };
 
     return (
-        <div className="relative w-full h-[400px] md:h-[500px] lg:h-[700px] overflow-hidden group">
+        <div className="relative w-full h-[250px] sm:h-[400px] md:h-[500px] lg:h-[700px] overflow-hidden group">
             {/* Slides */}
             <div
                 className="flex transition-transform duration-700 ease-in-out h-full"

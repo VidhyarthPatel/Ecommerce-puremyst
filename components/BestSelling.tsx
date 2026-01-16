@@ -49,7 +49,7 @@ export default function BestSelling() {
             <div className="w-[95%] mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        <span className="text-black font-semibold text-5xl">Best Seller</span>
+                        <span className="text-black font-semibold text-3xl md:text-5xl">Best Seller</span>
                     </h2>
                 </div>
 
