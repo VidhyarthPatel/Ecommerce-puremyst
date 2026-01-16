@@ -79,6 +79,8 @@ type Product = {
   rating: number;
   units: number;
   category: string;
+  keyFeatures: string[]; // ✨ Added keyFeatures
+  faqs?: { question: string; answer: string }[]; // ✨ Added faqs
   createdAt?: string;
   ProductsImage?: { id: string; imageUrl: string }[];
 };
@@ -180,7 +182,11 @@ export default function ProductsPage() {
     images: [] as string[],
     currentImage: "",
     rating: "",
-    featured: false, // ✨ Added featured
+    featured: false,
+    keyFeatures: [] as string[], // ✨ Added keyFeatures
+    currentFeature: "", // ✨ Added currentFeature input
+    faqs: [] as { question: string; answer: string }[], // ✨ Added faqs
+    currentFAQ: { question: "", answer: "" }, // ✨ Added currentFAQ input
   });
 
   // --- Fetch products ---
@@ -292,6 +298,38 @@ export default function ProductsPage() {
   const removeImage = (index: number) =>
     setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
 
+  // --- ✨ NEW Feature helpers ---
+  const addFeature = () => {
+    if (!formData.currentFeature.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      keyFeatures: [...prev.keyFeatures, prev.currentFeature.trim()],
+      currentFeature: "",
+    }));
+  };
+
+  const removeFeature = (index: number) =>
+    setFormData((prev) => ({
+      ...prev,
+      keyFeatures: prev.keyFeatures.filter((_, i) => i !== index),
+    }));
+
+  // --- ✨ NEW FAQ helpers ---
+  const addFAQ = () => {
+    if (!formData.currentFAQ.question.trim() || !formData.currentFAQ.answer.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      faqs: [...prev.faqs, { ...prev.currentFAQ }],
+      currentFAQ: { question: "", answer: "" },
+    }));
+  };
+
+  const removeFAQ = (index: number) =>
+    setFormData((prev) => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, i) => i !== index),
+    }));
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -302,7 +340,11 @@ export default function ProductsPage() {
       images: [],
       currentImage: "",
       rating: "",
-      featured: false, // ✨ Reset featured
+      featured: false,
+      keyFeatures: [],
+      currentFeature: "",
+      faqs: [],
+      currentFAQ: { question: "", answer: "" },
     });
     setEditingProduct(null);
   };
@@ -322,7 +364,9 @@ export default function ProductsPage() {
       category: formData.category,
       images: formData.images,
       rating: Number(formData.rating) || 0,
-      featured: formData.featured, // ✨ Added featured
+      featured: formData.featured,
+      keyFeatures: formData.keyFeatures, // ✨ Added keyFeatures
+      faqs: formData.faqs, // ✨ Added faqs
     };
     // ... (rest of the function is unchanged, it will work as-is)
     setSaving(true);
@@ -375,7 +419,11 @@ export default function ProductsPage() {
       images: product.ProductsImage?.map((img) => img.imageUrl) ?? [],
       currentImage: "",
       rating: product.rating?.toString() ?? "0.0",
-      featured: product.featured ?? false, // ✨ Added featured
+      featured: product.featured ?? false,
+      keyFeatures: product.keyFeatures ?? [], // ✨ Added keyFeatures
+      currentFeature: "",
+      faqs: product.faqs ?? [], // ✨ Added faqs
+      currentFAQ: { question: "", answer: "" },
     });
     setDialogOpen(true);
   };
@@ -446,7 +494,7 @@ export default function ProductsPage() {
       </div>
     );
   };
-  
+
   // --- ✨ RENDER ERROR/LOADING STATES ---
   if (loading) {
     return (
@@ -503,8 +551,10 @@ export default function ProductsPage() {
               </DialogHeader>
 
               <Tabs defaultValue="details" className="flex-1 overflow-y-hidden flex flex-col">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="features">Features</TabsTrigger>
+                  <TabsTrigger value="faqs">FAQs</TabsTrigger>
                   <TabsTrigger value="images">Images</TabsTrigger>
                   <TabsTrigger value="metadata">Metadata</TabsTrigger>
                 </TabsList>
@@ -521,7 +571,7 @@ export default function ProductsPage() {
                           placeholder="e.g., AquaPure Pro"
                         />
                       </div>
-                       <div className="space-y-2">
+                      <div className="space-y-2">
                         <Label>Category *</Label>
                         <select
                           value={formData.category}
@@ -534,7 +584,7 @@ export default function ProductsPage() {
                         </select>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Price *</Label>
@@ -568,6 +618,119 @@ export default function ProductsPage() {
                         placeholder="Enter product description..."
                       />
                     </div>
+                  </div>
+                </TabsContent>
+
+                {/* --- TAB 1.5: Features --- */}
+                <TabsContent value="features" className="flex-1 overflow-y-auto py-3 px-1">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Add Key Feature</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          value={formData.currentFeature}
+                          onChange={(e) => handleInputChange("currentFeature", e.target.value)}
+                          placeholder="e.g., Removes 99.9% impurities"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addFeature();
+                            }
+                          }}
+                        />
+                        <Button onClick={addFeature} disabled={!formData.currentFeature.trim()}>
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+
+                    {formData.keyFeatures.length > 0 ? (
+                      <div className="space-y-2">
+                        <Label>Current Features ({formData.keyFeatures.length})</Label>
+                        <ul className="space-y-2">
+                          {formData.keyFeatures.map((feature, idx) => (
+                            <li key={idx} className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
+                              <span className="text-sm">{feature}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                onClick={() => removeFeature(idx)}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+                        No features added yet.
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                {/* --- TAB 1.6: FAQs --- */}
+                <TabsContent value="faqs" className="flex-1 overflow-y-auto py-3 px-1">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Add FAQ</Label>
+                      <Input
+                        value={formData.currentFAQ.question}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            currentFAQ: { ...prev.currentFAQ, question: e.target.value },
+                          }))
+                        }
+                        placeholder="Question"
+                      />
+                      <Textarea
+                        value={formData.currentFAQ.answer}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            currentFAQ: { ...prev.currentFAQ, answer: e.target.value },
+                          }))
+                        }
+                        placeholder="Answer"
+                        className="min-h-[80px]"
+                      />
+                      <Button
+                        onClick={addFAQ}
+                        disabled={!formData.currentFAQ.question.trim() || !formData.currentFAQ.answer.trim()}
+                        className="w-full"
+                      >
+                        Add FAQ
+                      </Button>
+                    </div>
+
+                    {formData.faqs.length > 0 ? (
+                      <div className="space-y-2">
+                        <Label>Current FAQs ({formData.faqs.length})</Label>
+                        <div className="space-y-2">
+                          {formData.faqs.map((faq, idx) => (
+                            <div key={idx} className="bg-secondary/50 p-3 rounded-md relative group">
+                              <p className="font-medium text-sm pr-6">{faq.question}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{faq.answer}</p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="absolute top-2 right-2 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                onClick={() => removeFAQ(idx)}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+                        No FAQs added yet.
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
@@ -641,7 +804,7 @@ export default function ProductsPage() {
                     )}
                   </div>
                 </TabsContent>
-                
+
                 {/* --- TAB 3: Metadata --- */}
                 <TabsContent value="metadata" className="flex-1 overflow-y-auto py-3 px-1">
                   <div className="grid gap-4">
@@ -819,7 +982,7 @@ export default function ProductsPage() {
                           </Badge>
                         </div>
                       </div>
-                       <DropdownMenu>
+                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="-mt-2 -mr-2">
                             <MoreHorizontal className="w-4 h-4" />
@@ -852,7 +1015,7 @@ export default function ProductsPage() {
                         <Label className="text-xs">Stock</Label>
                         <StockBadge units={p.units} />
                       </div>
-                       <div className="col-span-2">
+                      <div className="col-span-2">
                         <Label className="text-xs">Description</Label>
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {p.description || "No description."}
@@ -870,7 +1033,7 @@ export default function ProductsPage() {
               )}
             </div>
           </CardContent>
-          
+
           {/* --- ✨ NEW Pagination Controls --- */}
           {totalPages > 1 && (
             <CardFooter className="flex items-center justify-between p-4 border-t">

@@ -10,7 +10,7 @@ export default async function ProductDetailPage({
 
   const product = await prisma.products.findUnique({
     where: { slug },
-    include: { ProductsImage: true },
+    include: { ProductsImage: true, faqs: true } as any,
   });
 
   if (!product) {

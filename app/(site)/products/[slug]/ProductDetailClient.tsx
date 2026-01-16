@@ -66,7 +66,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
     price: product.price,
     originalPrice: product.originalPrice || null,
     images: product.ProductsImage?.map((img: any) => img.imageUrl) || ["/placeholder.png"],
-    highlights: product.features || [
+    highlights: product.keyFeatures && product.keyFeatures.length > 0 ? product.keyFeatures : [
       "Premium quality materials",
       "Easy installation",
       "Long-lasting performance",
@@ -107,7 +107,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
         averageRating={product.rating || 4.5}
         totalReviews={product.reviewCount || 50}
       />
-      <ProductFAQ faqs={product.faqs || defaultFAQs} />
+      {product.faqs && product.faqs.length > 0 && <ProductFAQ faqs={product.faqs} />}
       <RelatedProducts products={relatedProducts} />
     </main>
   );

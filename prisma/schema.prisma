@@ -18,10 +18,23 @@ model Products {
   rating      Float    @default(0)
   units       Int      @default(5)
   category    String
+  keyFeatures String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   ProductsImage ProductsImage[]
+  faqs          ProductFAQ[]
+}
+
+model ProductFAQ {
+  id        String   @id @default(cuid())
+  productId String
+  question  String
+  answer    String
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProductsImage {

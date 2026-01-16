@@ -15,6 +15,8 @@ const productSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   images: z.array(z.string().url()).optional(),
   category: z.string().min(1, "Category is required"),
+  keyFeatures: z.array(z.string()).optional(),
+  faqs: z.array(z.object({ question: z.string(), answer: z.string() })).optional(),
 });
 
 // ------------------ CREATE PRODUCT ------------------
@@ -45,11 +47,18 @@ export async function POST(req: Request) {
         units: rest.units ?? 0,
         featured: rest.featured ?? false,
         rating: rest.rating ?? 0,
+        keyFeatures: rest.keyFeatures ?? [],
         ProductsImage: {
           create: (images ?? []).map((url) => ({ imageUrl: url })),
         },
-      },
-      include: { ProductsImage: true },
+        faqs: {
+          create: (rest.faqs ?? []).map((faq) => ({
+            question: faq.question,
+            answer: faq.answer,
+          })),
+        },
+      } as any,
+      include: { ProductsImage: true, faqs: true } as any,
     });
 
     return NextResponse.json(product);
@@ -66,7 +75,7 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const products = await prisma.products.findMany({
-      include: { ProductsImage: true },
+      include: { ProductsImage: true, faqs: true } as any,
     });
     return NextResponse.json(products);
   } catch (err) {
@@ -112,12 +121,20 @@ export async function PUT(req: Request) {
         slug: newSlug, // update slug
         featured: rest.featured ?? false,
         rating: rest.rating ?? 0,
+        keyFeatures: rest.keyFeatures ?? [],
         ProductsImage: {
           deleteMany: {}, // clear old
           create: (images ?? []).map((url) => ({ imageUrl: url })),
         },
-      },
-      include: { ProductsImage: true },
+        faqs: {
+          deleteMany: {}, // clear old
+          create: (rest.faqs ?? []).map((faq) => ({
+            question: faq.question,
+            answer: faq.answer,
+          })),
+        },
+      } as any,
+      include: { ProductsImage: true, faqs: true } as any,
     });
 
     return NextResponse.json(updatedProduct);
