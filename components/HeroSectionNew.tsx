@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { ArrowRight, ShowerHead, Filter, Droplets } from "lucide-react";
-import poster from "@/assets/poster.jpeg";
+
 import washingMachineFilters from "@/assets/washing-machine-filters.jpeg";
 import mainPoster from "@/assets/mainPoster.jpeg"
 import waterFilter from "@/assets/water-filter.jpeg";
