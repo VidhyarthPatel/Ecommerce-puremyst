@@ -61,13 +61,13 @@ export default function BestSelling() {
                     <ChevronRight className="w-6 h-6" />
                 </button>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="bg-white dark:bg-ocean-800 rounded-xl border border-gray-100 dark:border-ocean-700 p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+                            className="bg-white dark:bg-ocean-800 rounded-xl border border-gray-100 dark:border-ocean-700 p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col"
                         >
-                            <Link href={`/products/${product.slug}`} className="block relative aspect-square mb-4 overflow-hidden rounded-lg bg-gray-50 dark:bg-ocean-700">
+                            <Link href={`/products/${product.slug}`} className="block relative aspect-square mb-3 md:mb-4 overflow-hidden rounded-lg bg-gray-50 dark:bg-ocean-700">
                                 <img
                                     src={product.ProductsImage?.[0]?.imageUrl || "/placeholder.png"}
                                     alt={product.name}
@@ -78,40 +78,34 @@ export default function BestSelling() {
                             <div className="flex items-center mb-2">
                                 <div className="flex text-yellow-400">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? "fill-current" : "text-gray-300 dark:text-gray-600"}`} />
+                                        <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(product.rating) ? "fill-current" : "text-gray-300 dark:text-gray-600"}`} />
                                     ))}
                                 </div>
-                                <span className="text-xs text-gray-500 ml-2">{product.rating}</span>
+                                <span className="text-[10px] md:text-xs text-gray-500 ml-1 md:ml-2">{product.rating}</span>
                             </div>
 
                             <Link href={`/products/${product.slug}`} className="block mb-2">
-                                <h3 className="text-sm font-medium dark:text-white line-clamp-2 min-h-[2.5em]">
+                                <h3 className="text-xs md:text-sm font-medium dark:text-white line-clamp-2 min-h-[2.5em]">
                                     {product.name}
                                 </h3>
-                                {/* Assuming category or description can be used here, keeping generic for now or removing static text */}
-                                {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Shower and Tap Filters</p> */}
                             </Link>
 
                             <div className="mt-auto">
-                                <div className="flex items-baseline gap-2 mb-3">
-                                    <span className="text-lg font-bold dark:text-white">
+                                <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-2 md:mb-3">
+                                    <span className="text-sm md:text-lg font-bold dark:text-white">
                                         ₹{product.price.toLocaleString()}
                                     </span>
                                     {product.discount && (
-                                        <>
-                                            <span className="text-sm text-gray-400 line-through">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-xs md:text-sm text-gray-400 line-through">
                                                 ₹{Math.round(product.price / (1 - product.discount / 100)).toLocaleString()}
                                             </span>
-                                            <span className="text-xs text-green-600 font-medium">
+                                            <span className="text-[10px] md:text-xs text-green-600 font-medium">
                                                 {product.discount}% Off
                                             </span>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
-
-                                <button className="w-full py-2.5 bg-theme-blue hover:bg-theme-blue-hover text-white rounded-full text-sm font-medium transition-colors">
-                                    Add to Cart
-                                </button>
                             </div>
                         </div>
                     ))}
