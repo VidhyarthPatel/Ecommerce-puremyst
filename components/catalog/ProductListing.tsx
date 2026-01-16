@@ -98,12 +98,12 @@ export default function ProductListing({ title, description, initialCategories =
     return (
         <main className="min-h-screen bg-white dark:bg-ocean-900 pt-24 pb-12">
             {/* Page Header */}
-            <div className="bg-theme-blue text-white py-12 mb-8">
+            <div className="py-16 mb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="font-poppins text-3xl md:text-4xl font-bold mb-4">
+                    <h1 className="font-poppins text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
                         {title}
                     </h1>
-                    <p className="text-blue-50 max-w-2xl mx-auto text-lg">
+                    <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg">
                         {description}
                     </p>
                 </div>
