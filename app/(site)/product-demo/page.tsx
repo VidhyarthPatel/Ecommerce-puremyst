@@ -5,7 +5,7 @@ import ProductSpecs from "@/components/ProductSpecs";
 import ProductReviews from "@/components/ProductReviews";
 import ProductFAQ from "@/components/ProductFAQ";
 import RelatedProducts from "@/components/RelatedProducts";
-import posterImg from "@/assets/poster.jpeg";
+import posterImg from "@/assets/mainPoster.jpeg";
 
 // Sample product data
 const productData = {

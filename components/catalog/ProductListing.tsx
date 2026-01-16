@@ -59,7 +59,6 @@ export default function ProductListing({ title, description, initialCategories =
                     imageUrl: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
                     inStock: product.units > 0,
                     tags: [
-                        product.featured ? "Featured" : null,
                         product.discount ? "Sale" : null,
                         product.units < 5 && product.units > 0 ? "Low Stock" : null
                     ].filter(Boolean) as string[],
