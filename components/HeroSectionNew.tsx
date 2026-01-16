@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
 import Link from "next/link";
 import { ArrowRight, ShowerHead, Filter, Droplets } from "lucide-react";
 import poster from "@/assets/poster.jpeg";
 import washingMachineFilters from "@/assets/washing-machine-filters.jpeg";
+import mainPoster from "@/assets/mainPoster.jpeg"
 import waterFilter from "@/assets/water-filter.jpeg";
 
 export default function HeroSectionNew() {
@@ -11,7 +11,7 @@ export default function HeroSectionNew() {
         <section className="py-12 mt-15 bg-blue-50/30 dark:bg-ocean-900">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-center ">
-                    <img src={poster.src} alt="Water Filter Poster" className="w-full rounded-2xl shadow-sm" />
+                    <img src={mainPoster.src} alt="Water Filter Poster" className="w-full rounded-2xl shadow-sm" />
                 </div>
 
                 <div className="text-center my-12">
@@ -25,7 +25,7 @@ export default function HeroSectionNew() {
                     <div className="relative overflow-hidden rounded-3xl bg-[#4FA3E3] group transition-transform hover:scale-[1.01] duration-300">
                         <div className="absolute inset-0">
                             <img
-                                src={washingMachineFilters.src}
+                                src={mainPoster.src}
                                 alt="Shower and Tap Filters"
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import FilterSidebar from "@/components/catalog/FilterSidebar";
-import SortControls from "@/components/catalog/SortControls";
+
+
 import ProductGrid from "@/components/catalog/ProductGrid";
 
 // Type definition matching the API response
@@ -29,16 +29,12 @@ interface ProductListingProps {
 }
 
 export default function ProductListing({ title, description, initialCategories = [], apiEndpoint = "/api/products" }: ProductListingProps) {
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
-    const [priceRange, setPriceRange] = useState<number[]>([0, 50000]);
-    const [minRating, setMinRating] = useState<number | null>(null);
-    const [inStockOnly, setInStockOnly] = useState(false);
-    const [sortBy, setSortBy] = useState("popularity");
+
 
     // Reset selected categories if initialCategories changes (though unlikely for this use case)
     // But we want to allow user to change filters, so we only initialize.
@@ -82,47 +78,7 @@ export default function ProductListing({ title, description, initialCategories =
         fetchProducts();
     }, []);
 
-    const filteredProducts = React.useMemo(() => {
-        let result = [...products];
-
-        // Filter by Category
-        if (selectedCategories.length > 0) {
-            result = result.filter(p => selectedCategories.includes(p.category));
-        }
-
-        // Filter by Price
-        result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
-        // Filter by Rating
-        if (minRating) {
-            result = result.filter(p => p.rating >= minRating);
-        }
-
-        // Filter by Stock
-        if (inStockOnly) {
-            result = result.filter(p => p.inStock);
-        }
-
-        // Sort
-        switch (sortBy) {
-            case "price-low":
-                result.sort((a, b) => a.price - b.price);
-                break;
-            case "price-high":
-                result.sort((a, b) => b.price - a.price);
-                break;
-            case "newest":
-                // Assuming newer items are at the end or have a date, but for now just reverse
-                result.reverse();
-                break;
-            case "popularity":
-            default:
-                // Default sort (usually by ID or whatever API returns)
-                break;
-        }
-
-        return result;
-    }, [products, selectedCategories, priceRange, minRating, inStockOnly, sortBy]);
+    const filteredProducts = products;
 
     if (error) {
         return (
@@ -156,55 +112,20 @@ export default function ProductListing({ title, description, initialCategories =
 
             <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar */}
-                    <div className="lg:w-64 flex-shrink-0">
-                        <FilterSidebar
-                            isOpen={isFilterOpen}
-                            onClose={() => setIsFilterOpen(false)}
-                            selectedCategories={selectedCategories}
-                            setSelectedCategories={setSelectedCategories}
-                            priceRange={priceRange}
-                            setPriceRange={setPriceRange}
-                            minRating={minRating}
-                            setMinRating={setMinRating}
-                            inStockOnly={inStockOnly}
-                            setInStockOnly={setInStockOnly}
-                        />
-                    </div>
-
                     {/* Main Content */}
                     <div className="flex-1">
-                        <SortControls
-                            onFilterClick={() => setIsFilterOpen(true)}
-                            viewMode={viewMode}
-                            setViewMode={setViewMode}
-                            sortBy={sortBy}
-                            setSortBy={setSortBy}
-                            totalProducts={products.length}
-                            filteredCount={filteredProducts.length}
-                        />
+
 
                         {filteredProducts.length > 0 ? (
                             <ProductGrid
                                 products={filteredProducts}
-                                viewMode={viewMode}
+                                viewMode="grid"
                                 isLoading={loading}
                             />
                         ) : (
                             !loading && (
                                 <div className="text-center py-20">
-                                    <p className="text-gray-500 text-lg">No products match your filters.</p>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategories(initialCategories);
-                                            setPriceRange([0, 50000]);
-                                            setMinRating(null);
-                                            setInStockOnly(false);
-                                        }}
-                                        className="mt-4 text-theme-blue hover:underline"
-                                    >
-                                        Clear all filters
-                                    </button>
+                                    <p className="text-gray-500 text-lg">No products found.</p>
                                 </div>
                             )
                         )}

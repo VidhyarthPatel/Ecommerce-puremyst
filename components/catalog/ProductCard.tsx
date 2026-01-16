@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <button
                         onClick={handleAddToCart}
                         disabled={!product.inStock || loading}
-                        className="bg-white text-theme-blue p-3 rounded-full hover:bg-theme-blue hover:text-white transition-colors shadow-lg transform translate-y-4 group-hover:translate-y-0 duration-300"
+                        className="bg-white  p-3 rounded-full hover:bg-theme-blue hover:text-white transition-colors shadow-lg transform translate-y-4 group-hover:translate-y-0 duration-300"
                         aria-label="Add to cart"
                     >
                         <ShoppingCart className="w-5 h-5" />
@@ -84,7 +84,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Content */}
             <div className="p-5 flex-1 flex flex-col">
                 <div className="flex-1">
-                    <h3 className="font-poppins font-semibold text-lg text-theme-blue dark:text-white mb-2 line-clamp-2 group-hover:text-theme-blue-hover transition-colors">
+                    <h3 className="font-poppins font-semibold text-lg dark:text-white mb-2 line-clamp-2">
                         {product.name}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
@@ -110,7 +110,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {/* Price & Action */}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex flex-col">
-                        <span className="text-xl font-bold text-theme-blue dark:text-white">
+                        <span className="text-xl font-bold dark:text-white">
                             ₹{product.price.toLocaleString()}
                         </span>
                         {product.originalPrice && (
