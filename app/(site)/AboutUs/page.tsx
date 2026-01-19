@@ -1,171 +1,107 @@
 import Image from "next/image";
-import React from "react";
 import AboutIMG from "@/assets/aboutIMG.png";
 
-function AboutUs() {
+export default function AboutUs() {
   return (
-    <section id="about" className="bg-white py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-white text-gray-900 pt-20 pb-20 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         {/* Header */}
-        <div className="text-center mb-16">
-          <div className="w-16 h-1 bg-blue-600 mx-auto mb-6"></div>
-          <h2 className="text-4xl font-light tracking-tight text-gray-900 mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <h1 className="text-4xl font-medium tracking-tight text-gray-900 sm:text-5xl mb-6">
             About PureMyst
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            For over eight years, revolutionizing water purification across India with 
-            cutting-edge technology and unwavering commitment to quality.
+          </h1>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Delivering confidence in every drop with cleaner, safer, and better-quality water solutions.
           </p>
         </div>
 
-        {/* Main Content */}
-        <div className="flex flex-col lg:flex-row items-center gap-16 mb-20">
-          {/* Image */}
-          <div className="w-full lg:w-1/2">
-            <div className="relative">
-              <Image
-                src={AboutIMG}
-                alt="PureMyst Water Purification Technology"
-                className="rounded-2xl shadow-lg w-full object-cover"
-              />
-              {/* Decorative element */}
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-blue-600 rounded-2xl -z-10"></div>
-            </div>
+        {/* Who We Are */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+          <div className="relative aspect-[4/3] w-full bg-gray-100 rounded-2xl overflow-hidden">
+            <Image
+              src={AboutIMG}
+              alt="PureMyst Water Solutions"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
           </div>
-
-          {/* Text Content */}
-          <div className="w-full lg:w-1/2">
-            <div className="max-w-lg">
-              <div className="border-l-4 border-blue-600 pl-6 mb-8">
-                <h3 className="text-2xl font-light text-gray-900 mb-4">
-                  Comprehensive Water Solutions
-                </h3>
-                <div className="space-y-4 text-gray-600 leading-relaxed">
-                  <p>
-                    We provide all types of water purifiers including electric, non-electric, 
-                    UV, RO, commercial RO, and industrial RO purifiers, with sales and service 
-                    across India.
-                  </p>
-                  <p>
-                    Founded in 2015 by environmental engineers and public health specialists, 
-                    PureMyst emerged from a simple yet powerful belief: access to clean water 
-                    is a fundamental human right.
-                  </p>
-                  <p className="text-sm text-gray-500 font-medium">
-                    Serving over 50,000 households nationwide with reliable water purification.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mission & Values Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
-          {/* Left Column */}
-          <div className="space-y-8">
-            <div className="border-l-4 border-blue-600 pl-6">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 text-sm font-medium">1</span>
-                </div>
-                <h3 className="text-xl font-light text-gray-900">Our Mission</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                To make clean water accessible through sustainable, innovative solutions that 
-                empower communities and protect our environment.
+          <div className="space-y-6">
+            <h2 className="text-2xl font-medium text-gray-900">Who We Are</h2>
+            <div className="space-y-4 text-gray-600 leading-relaxed">
+              <p>
+                PureMyst is a water solutions brand dedicated to bringing cleaner, safer, and better-quality water into everyday homes. We specialize in designing and supplying innovative water purifiers, appliance water filters, and whole-home filtration solutions that protect health, enhance lifestyle, and extend the life of household appliances.
               </p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 text-sm font-medium">2</span>
-                </div>
-                <h3 className="text-xl font-light text-gray-900">Environmental Commitment</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                Designed with circular economy principles, our systems use recyclable materials 
-                and reduce water wastage by up to 60% compared to conventional systems.
+              <p>
+                At PureMyst, we believe water should not only be safe to drink, but also safe for bathing, washing, and cooking. That’s why our product range covers everything from non-electric purifiers and RO systems to washing machine filters, tap filters, shower filters, and whole-house solutions — all built with a focus on performance, affordability, and long-term reliability.
               </p>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            <div className="border-l-4 border-blue-600 pl-6">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 text-sm font-medium">3</span>
-                </div>
-                <h3 className="text-xl font-light text-gray-900">Why Choose PureMyst</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                Multi-stage filtration removes over 99.9% of contaminants while maintaining 
-                essential minerals, with service centers across India.
-              </p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 text-sm font-medium">4</span>
-                </div>
-                <h3 className="text-xl font-light text-gray-900">Future Vision</h3>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                By 2030, we aim to provide clean water solutions to one million households 
-                annually, focusing on regions most affected by water scarcity.
+              <p>
+                Every PureMyst product is developed with careful filtration design, quality materials, and real Indian water conditions in mind. Our goal is simple: to make advanced water filtration accessible to every home.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-8 rounded-2xl mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-light mb-2">8+</div>
-              <div className="text-sm text-blue-100">Years of Excellence</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-light mb-2">50K+</div>
-              <div className="text-sm text-blue-100">Households Served</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-light mb-2">25+</div>
-              <div className="text-sm text-blue-100">Cities Across India</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-light mb-2">99.9%</div>
-              <div className="text-sm text-blue-100">Contaminant Removal</div>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center">
-          <div className="max-w-2xl mx-auto">
-            <h3 className="text-2xl font-light text-gray-900 mb-4">
-              Experience Pure Water
-            </h3>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Discover the PureMyst difference—where advanced technology meets 
-              reliable service and environmental responsibility.
+        {/* Vision */}
+        <div className="bg-gray-50 rounded-3xl p-10 lg:p-16 text-center mb-24">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-medium text-gray-900 mb-6">Our Vision</h2>
+            <p className="text-xl text-gray-700 leading-relaxed italic mb-8">
+              "To become a most trusted water filtration brand, known for improving everyday life through pure water, smart design, and honest quality."
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all duration-300 transform hover:scale-105">
-                View Products
-              </button>
-              <button className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all duration-300">
-                Contact Sales
-              </button>
-            </div>
+            <p className="text-gray-600">
+              We envision a future where every home has access to water that is not just clear, but truly clean — water that supports better health, protects appliances, and promotes a more sustainable way of living.
+            </p>
           </div>
         </div>
+
+        {/* Mission */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-medium text-gray-900">Our Mission</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Effective Solutions",
+                desc: "Provide effective, affordable, and reliable water filtration solutions.",
+              },
+              {
+                title: "Real Challenges",
+                desc: "Design products suited for real household water challenges.",
+              },
+              {
+                title: "Sustainability",
+                desc: "Reduce dependency on expensive, high-wastage systems wherever possible.",
+              },
+              {
+                title: "Awareness",
+                desc: "Promote water awareness, conservation, and smarter purification choices.",
+              },
+              {
+                title: "Trust & Quality",
+                desc: "Build long-term customer trust through quality, transparency, and service.",
+              },
+            ].map((item, index) => (
+              <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Note */}
+        <div className="text-center border-t border-gray-100 pt-16">
+          <p className="text-xl text-gray-900 font-medium">
+            At PureMyst, we don’t just sell water filters — we work to deliver confidence in every drop.
+          </p>
+        </div>
+
       </div>
-    </section>
+    </div>
   );
 }
-
-export default AboutUs;
