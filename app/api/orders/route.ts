@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     // compute totals server-side (rupees, as your schema uses Float)
     const subtotal = items.reduce((s, it) => s + it.productPrice * it.quantity, 0);
-    const shipping = typeof shippingRupees === "number" ? shippingRupees : subtotal > 0 ? 40 : 0;
+    const shipping = typeof shippingRupees === "number" ? shippingRupees : 0; // Removed dummy 40
     const total = subtotal + shipping;
 
     const totalPaise = Math.round(total * 100);
@@ -194,5 +194,26 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("orders.create error:", err);
     return NextResponse.json({ ok: false, error: "Server error creating order" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { orderId, status } = body;
+
+    if (!orderId || !status) {
+      return NextResponse.json({ ok: false, error: "Missing orderId or status" }, { status: 400 });
+    }
+
+    const updatedOrder = await prisma.guestOrder.update({
+      where: { id: orderId },
+      data: { status },
+    });
+
+    return NextResponse.json({ ok: true, data: updatedOrder });
+  } catch (err: any) {
+    console.error("orders.PUT error:", err);
+    return NextResponse.json({ ok: false, error: "Failed to update order" }, { status: 500 });
   }
 }

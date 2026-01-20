@@ -1,1093 +1,578 @@
 "use client";
 
-import React from "react";
-// --- NEW IMPORTS ---
+import React, { useState, useMemo, useEffect } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import {
-  Search,
-  Loader2,
-  Upload,
-  X,
-  Star,
-  MoreHorizontal,
-  PackageSearch, // For empty state
-  AlertCircle,  // For low stock
-  CheckCircle2, // For in stock
-  XCircle,      // For out of stock
-  Filter,
+  Search, Plus, Edit3, Trash2,
+  Package, Filter, AlertTriangle, CheckCircle,
+  Image as ImageIcon, MoreVertical, Settings,
+  ChevronRight, Info
 } from "lucide-react";
-// --- ORIGINAL IMPORTS ---
+
+// shadcn/ui components (Ensure these are installed)
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Toaster, toast } from "sonner";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter,
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-// Updated Type to make 'featured' non-optional
+// --- Types ---
 type Product = {
   id: string;
   slug: string;
   name: string;
   description: string;
   price: number;
-  discount?: number;
-  featured: boolean; // Changed from optional
+  featured: boolean;
   rating: number;
   units: number;
   category: string;
-  keyFeatures: string[]; // ✨ Added keyFeatures
-  faqs?: { question: string; answer: string }[]; // ✨ Added faqs
-  createdAt?: string;
+  keyFeatures: string[];
+  faqs?: { question: string; answer: string }[];
   ProductsImage?: { id: string; imageUrl: string }[];
 };
 
-// --- ✨ NEW HELPER COMPONENTS (for a richer UI) ---
+const CATEGORIES = [
+  "RO Water Purifier",
+  "Commercial Water Purifier",
+  "Washing Machine Cleaner",
+  "Accessories",
+];
 
-/**
- * Displays a visual rating using Star icons.
- */
-const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
-  const totalStars = 5;
-  const fullStars = Math.floor(rating);
-  const halfStar = rating - fullStars >= 0.5;
-  const emptyStars = totalStars - fullStars - (halfStar ? 1 : 0);
+export default function EnhancedInventoryPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array(fullStars)
-        .fill(0)
-        .map((_, i) => (
-          <Star key={`full-${i}`} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-        ))}
-      {/* Note: shadcn doesn't have a half-star, so we'll just use full/empty for simplicity */
-      /* {halfStar && <StarHalf className="w-4 h-4 text-yellow-500 fill-yellow-500" />} */}
-      {Array(emptyStars)
-        .fill(0)
-        .map((_, i) => (
-          <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
-        ))}
-      <span className="ml-1 text-xs text-gray-500">({rating.toFixed(1)})</span>
-    </div>
-  );
-};
-
-/**
- * Displays a colored badge based on stock (units)
- */
-const StockBadge: React.FC<{ units: number }> = ({ units }) => {
-  if (units === 0) {
-    return (
-      <Badge variant="destructive" className="flex items-center gap-1">
-        <XCircle className="w-3 h-3" />
-        Out of Stock
-      </Badge>
-    );
-  }
-  if (units < 10) {
-    return (
-      <Badge variant="outline" className="text-yellow-600 border-yellow-500 flex items-center gap-1">
-        <AlertCircle className="w-3 h-3" />
-        Low Stock ({units})
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="outline" className="text-green-600 border-green-500 flex items-center gap-1">
-      <CheckCircle2 className="w-3 h-3" />
-      In Stock ({units})
-    </Badge>
-  );
-};
-
-// --- MAIN COMPONENT ---
-
-export default function ProductsPage() {
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-
-  // --- ✨ NEW STATE for Search, Filter, and Pagination ---
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [categoryFilter, setCategoryFilter] = React.useState("All");
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 10;
-
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
-
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
-
-  const [saving, setSaving] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
-  const [uploading, setUploading] = React.useState(false);
-
-  const categoryOptions = [
-    "RO Water Purifier",
-    "Commercial Water Purifier",
-    "Washing Machine Cleaner",
-    "Accessories",
-  ];
-
-  const [formData, setFormData] = React.useState({
-    name: "",
-    price: "",
-    units: "",
-    description: "",
-    category: categoryOptions[0],
-    images: [] as string[],
-    currentImage: "",
-    rating: "",
-    featured: false,
-    keyFeatures: [] as string[], // ✨ Added keyFeatures
-    currentFeature: "", // ✨ Added currentFeature input
-    faqs: [] as { question: string; answer: string }[], // ✨ Added faqs
-    currentFAQ: { question: "", answer: "" }, // ✨ Added currentFAQ input
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "", price: "", units: "", description: "",
+    category: CATEGORIES[0], images: [] as string[],
+    rating: "0", featured: false, keyFeatures: [] as string[],
+    faqs: [] as { question: string; answer: string }[],
   });
 
-  // --- Fetch products ---
-  React.useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch("/api/products", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-        const data = await res.json();
-        setProducts(data);
-      } catch (err: any) {
-        setError(err?.message || "Unknown error");
-        toast.error("❌ Failed to load products. Please try again.", {
-          description: typeof err === "string" ? err : err?.message,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
-  // --- ✨ NEW COMPUTED VALUES for filtering and pagination ---
-  const filteredProducts = React.useMemo(() => {
-    return products
-      .filter((p) => {
-        // Search filter
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(searchLower) ||
-          p.description.toLowerCase().includes(searchLower)
-        );
-      })
-      .filter((p) => {
-        // Category filter
-        return categoryFilter === "All" || p.category === categoryFilter;
-      });
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      toast.error("Failed to load inventory");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCat = categoryFilter === "All" || p.category === categoryFilter;
+      return matchesSearch && matchesCat;
+    });
   }, [products, searchTerm, categoryFilter]);
 
-  const paginatedProducts = React.useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return filteredProducts.slice(start, end);
-  }, [filteredProducts, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  // --- Upload helper (unchanged) ---
-  const uploadToCloudinary = async (file: File): Promise<string> => {
-    const uploadForm = new FormData();
-    uploadForm.append("file", file);
-    // ... (rest of the function is unchanged)
-    try {
-      const response = await fetch("/api/upload", { method: "POST", body: uploadForm });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
-      }
-      const result = await response.json();
-      if (!result.url) throw new Error("No URL returned from server");
-      return result.url;
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      throw new Error(error?.message || "Failed to upload image");
+  const handleOpenSheet = (product?: Product) => {
+    if (product) {
+      setEditingProduct(product);
+      setFormData({
+        name: product.name,
+        price: product.price.toString(),
+        units: product.units.toString(),
+        description: product.description,
+        category: product.category,
+        images: product.ProductsImage?.map(img => img.imageUrl) || [],
+        rating: product.rating.toString(),
+        featured: product.featured,
+        keyFeatures: product.keyFeatures || [],
+        faqs: product.faqs || [],
+      });
+    } else {
+      setEditingProduct(null);
+      setFormData({
+        name: "", price: "", units: "", description: "",
+        category: CATEGORIES[0], images: [], rating: "0",
+        featured: false, keyFeatures: [], faqs: [],
+      });
     }
+    setIsSheetOpen(true);
   };
 
-  // --- File input handler (unchanged) ---
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-    setUploading(true);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     try {
-      // ... (rest of the function is unchanged)
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith("image/")) { /* ... */ continue; }
-        if (file.size > 5 * 1024 * 1024) { /* ... */ continue; }
-        try {
-          const imageUrl = await uploadToCloudinary(file);
-          setFormData((prev) => ({ ...prev, images: [...prev.images, imageUrl] }));
-          toast.success(`✅ Image "${file.name}" uploaded successfully!`);
-        } catch (err: any) {
-          toast.error(`❌ Failed to upload "${file.name}"`, { description: err?.message });
-        }
-      }
-    } catch (err: any) {
-      toast.error("❌ Failed to process images", { description: err?.message });
+      setUploading(true);
+      const data = new FormData();
+      data.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const { url } = await res.json();
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, url]
+      }));
+      toast.success("Image uploaded successfully");
+    } catch (err) {
+      toast.error("Failed to upload image");
     } finally {
       setUploading(false);
-      if (event.target) event.target.value = "";
     }
   };
 
-  // --- Form helpers ---
-  const handleInputChange = (key: string, value: string | boolean) => // Updated to accept boolean
-    setFormData((prev) => ({ ...prev, [key]: value }));
-
-  const addImage = () => {
-    if (!formData.currentImage.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, prev.currentImage.trim()],
-      currentImage: "",
-    }));
-  };
-
-  const removeImage = (index: number) =>
-    setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
-
-  // --- ✨ NEW Feature helpers ---
-  const addFeature = () => {
-    if (!formData.currentFeature.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      keyFeatures: [...prev.keyFeatures, prev.currentFeature.trim()],
-      currentFeature: "",
-    }));
-  };
-
-  const removeFeature = (index: number) =>
-    setFormData((prev) => ({
-      ...prev,
-      keyFeatures: prev.keyFeatures.filter((_, i) => i !== index),
-    }));
-
-  // --- ✨ NEW FAQ helpers ---
-  const addFAQ = () => {
-    if (!formData.currentFAQ.question.trim() || !formData.currentFAQ.answer.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      faqs: [...prev.faqs, { ...prev.currentFAQ }],
-      currentFAQ: { question: "", answer: "" },
-    }));
-  };
-
-  const removeFAQ = (index: number) =>
-    setFormData((prev) => ({
-      ...prev,
-      faqs: prev.faqs.filter((_, i) => i !== index),
-    }));
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      price: "",
-      units: "",
-      description: "",
-      category: categoryOptions[0],
-      images: [],
-      currentImage: "",
-      rating: "",
-      featured: false,
-      keyFeatures: [],
-      currentFeature: "",
-      faqs: [],
-      currentFAQ: { question: "", answer: "" },
-    });
-    setEditingProduct(null);
-  };
-
-  // --- Save (create/update) ---
-  const handleSave = async () => {
-    if (!formData.name.trim() || !formData.price || !formData.units) {
-      toast.error("❌ Please fill in all required fields");
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.price || !formData.category) {
+      toast.error("Please fill in all required fields");
       return;
     }
-    // --- ✨ UPDATED PAYLOAD ---
-    const payload = {
-      name: formData.name.trim(),
-      price: Number(formData.price),
-      units: Number(formData.units),
-      description: formData.description.trim(),
-      category: formData.category,
-      images: formData.images,
-      rating: Number(formData.rating) || 0,
-      featured: formData.featured,
-      keyFeatures: formData.keyFeatures, // ✨ Added keyFeatures
-      faqs: formData.faqs, // ✨ Added faqs
-    };
-    // ... (rest of the function is unchanged, it will work as-is)
-    setSaving(true);
+
     try {
-      let res: Response;
-      if (editingProduct) {
-        res = await fetch("/api/products", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, slug: editingProduct.slug }),
-        });
-      } else {
-        res = await fetch("/api/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
+      setSaving(true);
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price),
+        units: parseInt(formData.units) || 0,
+        rating: parseFloat(formData.rating) || 0,
+        slug: editingProduct?.slug, // Only for update
+      };
+
+      const res = await fetch("/api/products", {
+        method: editingProduct ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to save product");
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save product");
       }
-      const saved = await res.json();
-      if (editingProduct) {
-        setProducts((prev) => prev.map((p) => (p.slug === editingProduct.slug ? saved : p)));
-        toast.success("✅ Product updated successfully!");
-      } else {
-        setProducts((prev) => [saved, ...prev]);
-        toast.success("✅ Product added successfully!");
-      }
-      resetForm();
-      setDialogOpen(false);
+
+      toast.success(editingProduct ? "Product updated" : "Product created");
+      fetchProducts();
+      setIsSheetOpen(false);
     } catch (err: any) {
-      toast.error("❌ Failed to save product.", { description: err?.message });
+      toast.error(err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  // --- Edit ---
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    // --- ✨ UPDATED FORM POPULATION ---
-    setFormData({
-      name: product.name ?? "",
-      price: product.price?.toString() ?? "",
-      units: product.units?.toString() ?? "",
-      description: product.description ?? "",
-      category: product.category ?? categoryOptions[0],
-      images: product.ProductsImage?.map((img) => img.imageUrl) ?? [],
-      currentImage: "",
-      rating: product.rating?.toString() ?? "0.0",
-      featured: product.featured ?? false,
-      keyFeatures: product.keyFeatures ?? [], // ✨ Added keyFeatures
-      currentFeature: "",
-      faqs: product.faqs ?? [], // ✨ Added faqs
-      currentFAQ: { question: "", answer: "" },
-    });
-    setDialogOpen(true);
-  };
-
-  // --- Delete (unchanged) ---
   const handleDelete = async () => {
     if (!productToDelete) return;
-    setDeleting(true);
-    // ... (rest of the function is unchanged)
     try {
       const res = await fetch("/api/products", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug: productToDelete.slug }),
       });
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(txt || "Failed to delete product");
+      if (res.ok) {
+        toast.success("Product removed from inventory");
+        setProducts(prev => prev.filter(p => p.id !== productToDelete.id));
+        setProductToDelete(null);
       }
-      setProducts((prev) => prev.filter((p) => p.slug !== productToDelete.slug));
-      toast.success("🗑️ Product deleted successfully!");
-      setProductToDelete(null);
-      setDeleteDialogOpen(false);
-    } catch (err: any) {
-      toast.error("❌ Failed to delete product.", { description: err?.message });
-    } finally {
-      setDeleting(false);
+    } catch (err) {
+      toast.error("Could not delete product");
     }
   };
 
-  // --- UI helpers ---
-  const truncateDescription = (text: string, maxLength = 60) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + "...";
-  };
-
-  const ImageStack: React.FC<{ images?: string[]; size?: number }> = ({ images = [], size = 36 }) => {
-    if (!images || images.length === 0) {
-      return (
-        <div
-          className="w-9 h-9 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-500"
-          style={{ width: size, height: size }}
-        >
-          No
-        </div>
-      );
-    }
-    const visible = images.slice(0, 2);
-    const remaining = images.length - visible.length;
-    return (
-      <div className="flex items-center" style={{ gap: 6 }}>
-        {visible.map((src, idx) => (
-          <div key={idx} className="relative" style={{ width: size, height: size }}>
-            <img
-              src={src}
-              alt={`img-${idx}`}
-              className="rounded border object-cover"
-              style={{ width: size, height: size }}
-            />
-            {idx === visible.length - 1 && remaining > 0 && (
-              <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center text-white text-xs font-medium">
-                +{remaining}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // --- ✨ RENDER ERROR/LOADING STATES ---
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin mr-3 text-primary" />
-        <span className="text-lg text-muted-foreground">Loading products...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-          <p className="text-red-700 font-semibold text-lg">Error loading products</p>
-          <p className="text-red-600 text-sm mt-2">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="destructive" className="mt-4">
-            Try Again
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // --- ✨ NEW MAIN RENDER ---
   return (
     <TooltipProvider>
-      <div className="p-4 md:p-6">
-        <Toaster position="top-right" richColors closeButton />
+      <div className="flex flex-col h-screen bg-slate-50/30">
+        <Toaster position="top-center" richColors />
 
-        {/* --- ✨ Page Header --- */}
-        <div className="flex justify-between items-center mb-4">
+        {/* --- Header Section --- */}
+        <header className="bg-white border-b px-4 md:px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">📦 Products</h2>
-            <p className="text-muted-foreground">Manage your product inventory.</p>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Package className="w-6 h-6 text-blue-600" /> Inventory Dashboard
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">Total Catalog: {products.length} Products</p>
           </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative group flex-1 sm:flex-initial">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <Input
+                placeholder="Search by name..."
+                className="pl-9 w-full sm:w-64 h-10 bg-slate-50 border-slate-200 focus:bg-white transition-all shadow-sm text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button onClick={() => handleOpenSheet()} className="h-10 px-4 bg-blue-600 hover:bg-blue-700 shadow-sm font-semibold text-sm w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" /> Add Product
+            </Button>
+          </div>
+        </header>
 
-          <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  resetForm();
-                  setDialogOpen(true);
-                }}
-              >
-                + Add Product
-              </Button>
-            </DialogTrigger>
+        {/* --- Quick Stats Bar --- */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-b bg-white">
+          <div className="px-4 md:px-6 py-3 border-r border-b lg:border-b-0 hover:bg-slate-50 transition-colors cursor-default">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Categories</span>
+            <p className="text-lg font-bold text-slate-800">{CATEGORIES.length}</p>
+          </div>
+          <div className="px-4 md:px-6 py-3 border-r lg:border-r border-b lg:border-b-0 hover:bg-slate-50 transition-colors cursor-default">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Out of Stock</span>
+            <p className={`text-lg font-bold ${products.filter(p => p.units === 0).length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+              {products.filter(p => p.units === 0).length}
+            </p>
+          </div>
+          <div className="px-4 md:px-6 py-3 border-r hover:bg-slate-50 transition-colors cursor-default">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Low Stock Alert</span>
+            <p className="text-lg font-bold text-amber-600">{products.filter(p => p.units > 0 && p.units < 10).length}</p>
+          </div>
+          <div className="px-4 md:px-6 py-3 flex flex-col justify-center bg-blue-50/30">
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-0.5">Filter View</span>
+            <select
+              className="bg-transparent font-bold text-sm text-slate-700 focus:outline-none appearance-none cursor-pointer"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="All">All Inventory Items</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        </div>
 
-            {/* --- ✨ DIALOG (FORM) with TABS --- */}
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
-              <DialogHeader>
-                <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
-              </DialogHeader>
+        {/* --- Main Content Area --- */}
+        <main className="flex-1 overflow-hidden p-4 md:p-6">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm h-full flex flex-col overflow-hidden">
+            <ScrollArea className="flex-1">
+              <div className="min-w-[1000px] lg:min-w-full">
+                <Table className="table-fixed w-full">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-20 pl-6 py-4 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Preview</TableHead>
+                      <TableHead className="py-4 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Product Information</TableHead>
+                      <TableHead className="w-44 py-4 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Category</TableHead>
+                      <TableHead className="w-32 py-4 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Stock Level</TableHead>
+                      <TableHead className="w-24 py-4 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Price</TableHead>
+                      <TableHead className="w-40 text-right py-4 pr-8 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      Array(5).fill(0).map((_, i) => (
+                        <TableRow key={i}><TableCell colSpan={6} className="h-20 animate-pulse bg-slate-50/50" /></TableRow>
+                      ))
+                    ) : filteredProducts.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-64 text-center">
+                          <div className="flex flex-col items-center justify-center opacity-40">
+                            <Package className="w-16 h-16 mb-4" />
+                            <p className="text-lg font-medium">No products found matching your search.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredProducts.map((p) => (
+                        <TableRow key={p.id} className="hover:bg-slate-50/80 transition-all border-b group">
+                          <TableCell className="pl-6 py-3">
+                            <div className="w-12 h-12 rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden flex items-center justify-center group-hover:border-blue-300 transition-colors">
+                              {p.ProductsImage?.[0] ? (
+                                <img src={p.ProductsImage[0].imageUrl} className="w-full h-full object-cover" alt={p.name} />
+                              ) : (
+                                <ImageIcon className="w-5 h-5 text-slate-300" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3 overflow-hidden">
+                            <div className="flex flex-col gap-0.5 max-w-full">
+                              <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors truncate block">{p.name}</span>
+                              <span className="text-[11px] text-slate-500 line-clamp-1 italic block max-w-[400px]">{p.description || "No description provided."}</span>
+                              {p.featured && <Badge className="w-fit bg-indigo-50 text-indigo-700 border-indigo-100 text-[9px] uppercase font-bold px-1.5 py-0 mt-1">Featured</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <Badge variant="outline" className="text-[11px] px-2 py-0.5 font-medium bg-white text-slate-600 border-slate-200 shadow-sm">
+                              {p.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-xs font-bold ${p.units < 5 ? 'text-red-600' : 'text-slate-800'}`}>
+                                  {p.units} Units
+                                </span>
+                                {p.units < 10 && <AlertTriangle className="w-3 h-3 text-amber-500" />}
+                              </div>
+                              <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                  className={`h-full transition-all duration-500 ${p.units < 10 ? 'bg-amber-500' : 'bg-green-500'}`}
+                                  style={{ width: `${Math.min(p.units * 5, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3 text-sm font-bold text-slate-900">
+                            ₹{p.price.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="py-3 text-right pr-8">
+                            <div className="flex justify-end items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-medium text-xs flex items-center gap-1.5"
+                                onClick={() => handleOpenSheet(p)}
+                              >
+                                <Edit3 className="w-3.5 h-3.5" /> Edit
+                              </Button>
 
-              <Tabs defaultValue="details" className="flex-1 overflow-y-hidden flex flex-col">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="features">Features</TabsTrigger>
-                  <TabsTrigger value="faqs">FAQs</TabsTrigger>
-                  <TabsTrigger value="images">Images</TabsTrigger>
-                  <TabsTrigger value="metadata">Metadata</TabsTrigger>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-3 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium text-xs flex items-center gap-1.5"
+                                onClick={() => setProductToDelete(p)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+          </div>
+        </main>
+
+        {/* --- Editor Side-Sheet --- */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col border-l-0 shadow-2xl h-full">
+            <SheetHeader className="p-8 border-b bg-slate-50/80">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-blue-600 rounded-lg text-white">
+                  <Settings className="w-6 h-6" />
+                </div>
+                <div>
+                  <SheetTitle className="text-xl font-bold">{editingProduct ? "Modify Product" : "New Inventory Entry"}</SheetTitle>
+                  <SheetDescription>Configure specifications for the catalog.</SheetDescription>
+                </div>
+              </div>
+            </SheetHeader>
+
+            <ScrollArea className="flex-1 px-8 py-6">
+              <Tabs defaultValue="general" className="w-full">
+                <TabsList className="w-full grid grid-cols-4 mb-8 h-10 bg-slate-100 p-1">
+                  <TabsTrigger value="general" className="text-xs font-bold">General</TabsTrigger>
+                  <TabsTrigger value="specs" className="text-xs font-bold">Specs</TabsTrigger>
+                  <TabsTrigger value="faqs" className="text-xs font-bold">FAQs</TabsTrigger>
+                  <TabsTrigger value="media" className="text-xs font-bold">Media</TabsTrigger>
                 </TabsList>
 
-                {/* --- TAB 1: Details --- */}
-                <TabsContent value="details" className="flex-1 overflow-y-auto py-3 px-1">
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Name *</Label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e) => handleInputChange("name", e.target.value)}
-                          placeholder="e.g., AquaPure Pro"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Category *</Label>
-                        <select
-                          value={formData.category}
-                          onChange={(e) => handleInputChange("category", e.target.value)}
-                          className="w-full border rounded p-2 h-10 text-sm"
-                        >
-                          {categoryOptions.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                <TabsContent value="general" className="space-y-6 animate-in fade-in-50 duration-300">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Display Name</Label>
+                    <Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="h-11 text-md" placeholder="e.g. AquaPure 7-Stage RO" />
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Price *</Label>
-                        <Input
-                          type="number"
-                          value={formData.price}
-                          onChange={(e) => handleInputChange("price", e.target.value)}
-                          placeholder="0.00"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Units (Stock) *</Label>
-                        <Input
-                          type="number"
-                          value={formData.units}
-                          onChange={(e) => handleInputChange("units", e.target.value)}
-                          placeholder="0"
-                          min="0"
-                        />
-                      </div>
-                    </div>
-
+                  <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => handleInputChange("description", e.target.value)}
-                        className="min-h-[100px] max-h-[200px] resize-y"
-                        placeholder="Enter product description..."
-                      />
+                      <Label className="text-sm font-bold text-slate-700">Market Price (INR)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                        <Input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className="h-11 pl-8 text-md" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold text-slate-700">Initial Stock</Label>
+                      <Input type="number" value={formData.units} onChange={e => setFormData({ ...formData, units: e.target.value })} className="h-11 text-md" />
                     </div>
                   </div>
-                </TabsContent>
 
-                {/* --- TAB 1.5: Features --- */}
-                <TabsContent value="features" className="flex-1 overflow-y-auto py-3 px-1">
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Add Key Feature</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input
-                          value={formData.currentFeature}
-                          onChange={(e) => handleInputChange("currentFeature", e.target.value)}
-                          placeholder="e.g., Removes 99.9% impurities"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addFeature();
-                            }
-                          }}
-                        />
-                        <Button onClick={addFeature} disabled={!formData.currentFeature.trim()}>
-                          Add
-                        </Button>
-                      </div>
-                    </div>
-
-                    {formData.keyFeatures.length > 0 ? (
-                      <div className="space-y-2">
-                        <Label>Current Features ({formData.keyFeatures.length})</Label>
-                        <ul className="space-y-2">
-                          {formData.keyFeatures.map((feature, idx) => (
-                            <li key={idx} className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
-                              <span className="text-sm">{feature}</span>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                                onClick={() => removeFeature(idx)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-                        No features added yet.
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                {/* --- TAB 1.6: FAQs --- */}
-                <TabsContent value="faqs" className="flex-1 overflow-y-auto py-3 px-1">
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>Add FAQ</Label>
-                      <Input
-                        value={formData.currentFAQ.question}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            currentFAQ: { ...prev.currentFAQ, question: e.target.value },
-                          }))
-                        }
-                        placeholder="Question"
-                      />
-                      <Textarea
-                        value={formData.currentFAQ.answer}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            currentFAQ: { ...prev.currentFAQ, answer: e.target.value },
-                          }))
-                        }
-                        placeholder="Answer"
-                        className="min-h-[80px]"
-                      />
-                      <Button
-                        onClick={addFAQ}
-                        disabled={!formData.currentFAQ.question.trim() || !formData.currentFAQ.answer.trim()}
-                        className="w-full"
+                      <Label className="text-sm font-bold text-slate-700">Catalog Category</Label>
+                      <select
+                        className="w-full h-11 px-3 rounded-md border border-slate-200 bg-white text-md font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        value={formData.category}
+                        onChange={e => setFormData({ ...formData, category: e.target.value })}
                       >
-                        Add FAQ
-                      </Button>
+                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold text-slate-700">Rating (0-5)</Label>
+                      <Input type="number" step="0.1" min="0" max="5" value={formData.rating} onChange={e => setFormData({ ...formData, rating: e.target.value })} className="h-11 text-md" />
+                    </div>
+                  </div>
 
-                    {formData.faqs.length > 0 ? (
-                      <div className="space-y-2">
-                        <Label>Current FAQs ({formData.faqs.length})</Label>
-                        <div className="space-y-2">
-                          {formData.faqs.map((faq, idx) => (
-                            <div key={idx} className="bg-secondary/50 p-3 rounded-md relative group">
-                              <p className="font-medium text-sm pr-6">{faq.question}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{faq.answer}</p>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="absolute top-2 right-2 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                                onClick={() => removeFAQ(idx)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Marketing Description</Label>
+                    <Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="text-md min-h-[120px] leading-relaxed" placeholder="Highlight the key benefits..." />
+                  </div>
+
+                  <div className="flex items-center justify-between p-5 rounded-xl bg-blue-50/50 border border-blue-100 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <Info className="w-5 h-5 text-blue-600" />
+                      <div className="flex flex-col">
+                        <Label className="text-sm font-bold text-blue-900">Featured Placement</Label>
+                        <p className="text-xs text-blue-700">Pin this product to the main showcase.</p>
                       </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-                        No FAQs added yet.
-                      </div>
-                    )}
+                    </div>
+                    <Switch checked={formData.featured} onCheckedChange={v => setFormData({ ...formData, featured: v })} />
                   </div>
                 </TabsContent>
 
-                {/* --- TAB 2: Images --- */}
-                <TabsContent value="images" className="flex-1 overflow-y-auto py-3 px-1">
+                <TabsContent value="specs" className="space-y-6">
                   <div className="space-y-4">
-                    <div>
-                      <Label>Upload Images</Label>
-                      <div className="border-2 border-dashed border-gray-300 mt-2 rounded-lg p-4 text-center">
-                        <input
-                          id="file-upload"
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          disabled={uploading}
-                        />
-                        <label
-                          htmlFor="file-upload"
-                          className={`cursor-pointer flex flex-col items-center gap-2 ${uploading ? "opacity-50" : ""}`}
-                        >
-                          <Upload className="w-8 h-8 text-gray-400" />
-                          <div>
-                            <span className="text-sm font-medium text-blue-600">{uploading ? "Uploading..." : "Click to upload"}</span>
-                            <p className="text-xs text-gray-500">PNG, JPG, WEBP up to 5MB</p>
-                          </div>
-                        </label>
-                        {uploading && (
-                          <div className="flex items-center justify-center gap-2 mt-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm text-gray-600">Uploading images...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Or add image by URL</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input
-                          value={formData.currentImage}
-                          onChange={(e) => handleInputChange("currentImage", e.target.value)}
-                          placeholder="Paste image URL"
-                          disabled={uploading}
-                        />
-                        <Button onClick={addImage} disabled={!formData.currentImage.trim() || uploading}>
-                          Add
+                    <Label className="text-sm font-bold uppercase tracking-wider text-slate-400">Key Features List</Label>
+                    {formData.keyFeatures.map((f, i) => (
+                      <div key={i} className="flex gap-3 animate-in slide-in-from-left-2 duration-200">
+                        <Input value={f} onChange={e => {
+                          const newF = [...formData.keyFeatures];
+                          newF[i] = e.target.value;
+                          setFormData({ ...formData, keyFeatures: newF });
+                        }} className="h-10 text-sm" placeholder="e.g. 10L Capacity" />
+                        <Button variant="ghost" size="icon" className="h-10 w-10 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => setFormData({ ...formData, keyFeatures: formData.keyFeatures.filter((_, idx) => idx !== i) })}>
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </div>
-                    {formData.images.length > 0 && (
-                      <div className="mt-3">
-                        <Label>Image Previews ({formData.images.length})</Label>
-                        <div className="flex flex-wrap gap-2 mt-2 max-h-[250px] overflow-y-auto p-2 border rounded-md">
-                          {formData.images.map((img, idx) => (
-                            <div key={idx} className="relative group">
-                              <img src={img} className="w-24 h-24 rounded border object-cover" alt={`Preview ${idx + 1}`} />
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="absolute -top-2 -right-2 rounded-full p-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => removeImage(idx)}
-                                disabled={uploading}
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    ))}
+                    <Button variant="outline" className="w-full border-dashed h-10 border-slate-300 hover:bg-slate-50 text-xs" onClick={() => setFormData({ ...formData, keyFeatures: [...formData.keyFeatures, ""] })}>
+                      <Plus className="w-3 h-3 mr-2" /> Add Feature
+                    </Button>
                   </div>
                 </TabsContent>
 
-                {/* --- TAB 3: Metadata --- */}
-                <TabsContent value="metadata" className="flex-1 overflow-y-auto py-3 px-1">
-                  <div className="grid gap-4">
-                    <div className="space-y-2">
-                      <Label>Rating (0-5)</Label>
-                      <Input
-                        type="number"
-                        value={formData.rating}
-                        onChange={(e) => handleInputChange("rating", e.target.value)}
-                        placeholder="0.0"
-                        min="0"
-                        max="5"
-                        step="0.1"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <Label>Featured Product</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Display this product on the homepage.
-                        </p>
+                <TabsContent value="faqs" className="space-y-6">
+                  <div className="space-y-4">
+                    <Label className="text-sm font-bold uppercase tracking-wider text-slate-400">Product FAQs</Label>
+                    {formData.faqs.map((faq, i) => (
+                      <div key={i} className="space-y-2 p-4 border rounded-lg bg-slate-50/50 relative group">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setFormData({ ...formData, faqs: formData.faqs.filter((_, idx) => idx !== i) })}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold text-slate-500 uppercase">Question</Label>
+                          <Input
+                            value={faq.question}
+                            onChange={e => {
+                              const newFaqs = [...formData.faqs];
+                              newFaqs[i] = { ...newFaqs[i], question: e.target.value };
+                              setFormData({ ...formData, faqs: newFaqs });
+                            }}
+                            className="h-9 text-sm"
+                            placeholder="e.g. Is it easy to install?"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold text-slate-500 uppercase">Answer</Label>
+                          <Textarea
+                            value={faq.answer}
+                            onChange={e => {
+                              const newFaqs = [...formData.faqs];
+                              newFaqs[i] = { ...newFaqs[i], answer: e.target.value };
+                              setFormData({ ...formData, faqs: newFaqs });
+                            }}
+                            className="text-sm min-h-[60px]"
+                            placeholder="Provide a clear answer..."
+                          />
+                        </div>
                       </div>
-                      <Switch
-                        checked={formData.featured}
-                        onCheckedChange={(checked) => handleInputChange("featured", checked)}
-                      />
-                    </div>
+                    ))}
+                    <Button variant="outline" className="w-full border-dashed h-10 border-slate-300 hover:bg-slate-50 text-xs" onClick={() => setFormData({ ...formData, faqs: [...formData.faqs, { question: "", answer: "" }] })}>
+                      <Plus className="w-3 h-3 mr-2" /> Add FAQ Item
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="media" className="mt-0">
+                  <div className="grid grid-cols-3 gap-4">
+                    {formData.images.map((img, i) => (
+                      <div key={i} className="group relative aspect-square border-2 border-slate-100 rounded-xl overflow-hidden bg-slate-50 shadow-sm">
+                        <img src={img} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                        <button
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setFormData({ ...formData, images: formData.images.filter((_, idx) => idx !== i) })}
+                        >
+                          <Trash2 className="w-6 h-6 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="border-3 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all text-slate-400 hover:text-blue-500">
+                      {uploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                      ) : (
+                        <>
+                          <Plus className="w-8 h-8 mb-2" />
+                          <span className="text-[10px] font-bold uppercase tracking-tighter">Add Photo</span>
+                        </>
+                      )}
+                      <input type="file" className="hidden" onChange={handleImageUpload} disabled={uploading} accept="image/*" />
+                    </label>
                   </div>
                 </TabsContent>
               </Tabs>
+            </ScrollArea>
 
-              <DialogFooter className="flex-shrink-0 pt-4 border-t">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleSave} disabled={saving || uploading}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {editingProduct ? "Updating..." : "Saving..."}
-                    </>
-                  ) : editingProduct ? (
-                    "Update Product"
-                  ) : (
-                    "Save Product"
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* --- ✨ NEW Controls: Search & Filter --- */}
-        <div className="flex flex-col md:flex-row gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by name or description..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full md:w-auto">
-                <Filter className="w-4 h-4 mr-2" />
-                {categoryFilter === "All" ? "Filter by category" : categoryFilter}
+            <SheetFooter className="p-8 border-t bg-slate-50/80 backdrop-blur-sm">
+              <Button variant="ghost" className="h-12 px-6 font-bold text-slate-500 hover:text-slate-900" onClick={() => setIsSheetOpen(false)}>Discard Changes</Button>
+              <Button disabled={saving || uploading} onClick={handleSubmit} className="h-12 px-10 bg-blue-600 hover:bg-blue-700 font-bold shadow-lg shadow-blue-200">
+                {saving ? "Processing..." : "Commit to Inventory"}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setCategoryFilter("All")}>All</DropdownMenuItem>
-              {categoryOptions.map((cat) => (
-                <DropdownMenuItem key={cat} onClick={() => setCategoryFilter(cat)}>
-                  {cat}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
 
-        {/* --- ✨ Content Area (wrapped in Card) --- */}
-        <Card>
-          <CardContent className="p-0">
-            {/* --- Desktop Table --- */}
-            <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-24">Images</TableHead>
-                    <TableHead className="w-48">Name</TableHead>
-                    <TableHead className="w-36">Category</TableHead>
-                    <TableHead className="w-36">Stock</TableHead>
-                    <TableHead className="w-24">Price</TableHead>
-                    <TableHead className="w-32">Rating</TableHead>
-                    <TableHead className="w-24">Featured</TableHead>
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {paginatedProducts.length > 0 ? (
-                    paginatedProducts.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell>
-                          <ImageStack images={p.ProductsImage?.map((i) => i.imageUrl)} size={36} />
-                        </TableCell>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{p.category}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <StockBadge units={p.units} />
-                        </TableCell>
-                        <TableCell>₹{p.price.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <RatingStars rating={p.rating} />
-                        </TableCell>
-                        <TableCell>
-                          {p.featured ? (
-                            <Badge className="bg-green-100 text-green-700">Yes</Badge>
-                          ) : (
-                            <Badge variant="outline">No</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {/* ✨ NEW Action Dropdown */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEdit(p)}>
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-red-600"
-                                onClick={() => {
-                                  setProductToDelete(p);
-                                  setDeleteDialogOpen(true);
-                                }}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
-                        No products found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* --- ✨ Mobile Cards (upgraded) --- */}
-            <div className="grid md:hidden gap-4 p-4">
-              {paginatedProducts.length > 0 ? (
-                paginatedProducts.map((p) => (
-                  <Card key={p.id} className="shadow-sm">
-                    <CardHeader className="flex flex-row items-start justify-between p-4">
-                      <div className="flex gap-3">
-                        <ImageStack images={p.ProductsImage?.map((i) => i.imageUrl)} size={48} />
-                        <div>
-                          <p className="font-semibold">{p.name}</p>
-                          <Badge variant="secondary" className="mt-1">
-                            {p.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="-mt-2 -mr-2">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(p)}>Edit</DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => {
-                              setProductToDelete(p);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">Price</Label>
-                        <p className="font-medium">₹{p.price.toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Rating</Label>
-                        <RatingStars rating={p.rating} />
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-xs">Stock</Label>
-                        <StockBadge units={p.units} />
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-xs">Description</Label>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {p.description || "No description."}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-48 text-center">
-                  <PackageSearch className="w-12 h-12 text-muted-foreground" />
-                  <p className="mt-2 font-medium">No Products Found</p>
-                  <p className="text-sm text-muted-foreground">Try adjusting your search or filter.</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-
-          {/* --- ✨ NEW Pagination Controls --- */}
-          {totalPages > 1 && (
-            <CardFooter className="flex items-center justify-between p-4 border-t">
-              <span className="text-sm text-muted-foreground">
-                Page {currentPage} of {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
+        {/* --- Delete Verification --- */}
+        <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+          <AlertDialogContent className="sm:max-w-[450px] p-8">
+            <AlertDialogHeader>
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
-            </CardFooter>
-          )}
-        </Card>
-
-        {/* --- Delete Confirmation Dialog (Unchanged) --- */}
-        <Dialog open={deleteDialogOpen} onOpenChange={(open) => setDeleteDialogOpen(open)}>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Confirm Delete</DialogTitle>
-            </DialogHeader>
-            <p>
-              Are you sure you want to delete <strong>{productToDelete?.name}</strong>?
-            </p>
-            <DialogFooter className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                {deleting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  "Delete"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <AlertDialogTitle className="text-xl font-bold text-slate-900">Permanently Delete Product?</AlertDialogTitle>
+              <AlertDialogDescription className="text-md leading-relaxed py-2 text-slate-600">
+                You are about to remove <strong>{productToDelete?.name}</strong> from the store database. This action cannot be reversed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4 gap-3">
+              <AlertDialogCancel className="h-12 px-6 font-bold border-slate-200">Keep Product</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 h-12 px-8 font-bold shadow-lg shadow-red-100">
+                Yes, Delete Item
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );
