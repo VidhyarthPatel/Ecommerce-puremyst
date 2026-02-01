@@ -1,7 +1,5 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import React from "react";
+import { Star } from "lucide-react";
 
 const testimonials = [
     {
@@ -28,158 +26,60 @@ const testimonials = [
             "We installed the commercial water purifier in our office. It handles the load perfectly, and the maintenance is hassle-free.",
         rating: 4,
     },
-    {
-        id: 4,
-        name: "Neha Verma",
-        role: "Working Professional",
-        content:
-            "Installation was quick and the team explained everything clearly. Water quality feels much better now.",
-        rating: 5,
-    },
-    {
-        id: 5,
-        name: "Suresh Patel",
-        role: "Restaurant Owner",
-        content:
-            "We use their commercial purifier daily. Reliable performance and very low maintenance.",
-        rating: 4,
-    },
-    {
-        id: 6,
-        name: "Janvi Sharma",
-        role: "Student",
-        content:
-            "We use their commercial purifier daily. Reliable performance and very low maintenance.",
-        rating: 4,
-    },
-    {
-        id: 7,
-        name: "Suresh Patel",
-        role: "Restaurant Owner",
-        content:
-            "We use their commercial purifier daily. Reliable performance and very low maintenance.",
-        rating: 4,
-    },
-    {
-        id: 8,
-        name: "Suresh Patel",
-        role: "Restaurant Owner",
-        content:
-            "We use their commercial purifier daily. Reliable performance and very low maintenance.",
-        rating: 4,
-    },
-    {
-        id: 9,
-        name: "Suresh Patel",
-        role: "Restaurant Owner",
-        content:
-            "We use their commercial purifier daily. Reliable performance and very low maintenance.",
-        rating: 4,
-    },
 ];
 
 export default function Testimonials() {
-    const [index, setIndex] = useState(0);
-
-    const visibleCount =
-        typeof window !== "undefined"
-            ? window.innerWidth >= 1024
-                ? 3
-                : window.innerWidth >= 768
-                    ? 2
-                    : 1
-            : 3;
-
-    const maxIndex = testimonials.length - visibleCount;
-
-    const next = () => {
-        setIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    };
-
-    const prev = () => {
-        setIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-    };
-
-    // auto slide
-    useEffect(() => {
-        const timer = setInterval(() => {
-            next();
-        }, 5000);
-
-        return () => clearInterval(timer);
-    }, [index]);
-
     return (
-        <section className="py-24 bg-white border-t border-gray-100">
-            <div className="max-w-7xl mx-auto px-6 relative">
-
-                {/* heading */}
-                <h2 className="text-3xl font-semibold text-center text-gray-900 mb-16">
-                    What our customers say
-                </h2>
-
-                {/* arrows */}
-                <button
-                    onClick={prev}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10 hidden md:block"
-                >
-                    <ChevronLeft className="w-6 h-6" />
-                </button>
-
-                <button
-                    onClick={next}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full border bg-white hover:bg-gray-50 shadow-sm z-10 hidden md:block"
-                >
-                    <ChevronRight className="w-6 h-6" />
-                </button>
-
-                {/* slider */}
-                <div className="overflow-hidden px-4">
-                    <div
-                        className="flex transition-transform duration-500"
-                        style={{
-                            transform: `translateX(-${index * (100 / visibleCount)}%)`,
-                        }}
-                    >
-                        {testimonials.map((t) => (
-                            <div
-                                key={t.id}
-                                className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4"
-                            >
-                                <div className="border border-gray-200 rounded-xl p-8 bg-white hover:shadow-md transition h-full flex flex-col">
-                                    {/* stars */}
-                                    <div className="flex mb-4">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                className={`w-5 h-5 ${i < t.rating
-                                                    ? "text-yellow-400 fill-yellow-400"
-                                                    : "text-gray-300"
-                                                    }`}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    {/* text */}
-                                    <p className="text-lg text-gray-700 leading-relaxed mb-8 flex-grow">
-                                        “{t.content}”
-                                    </p>
-
-                                    {/* user */}
-                                    <div>
-                                        <p className="text-base font-medium text-gray-900">
-                                            {t.name}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {t.role}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+        <section className="py-24 bg-[#F8FAFC]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                {/* Section Header */}
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl font-bold text-[#0F172A] mb-4 font-heading">Trusted by PureMyst Customers</h2>
+                    <p className="text-[#475569] text-lg max-w-2xl mx-auto">Real experiences from homes and businesses across India.</p>
                 </div>
 
+                {/* Testimonials Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {testimonials.map((t) => (
+                        <div
+                            key={t.id}
+                            className="bg-white rounded-2xl border border-[#E2E8F0] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0EA5E9] hover:shadow-md flex flex-col"
+                        >
+                            {/* Stars */}
+                            <div className="flex mb-6">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star
+                                        key={i}
+                                        className={`w-5 h-5 ${i < t.rating ? "text-[#FACC15] fill-[#FACC15]" : "text-gray-200"}`}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Content */}
+                            <p className="text-lg text-[#475569] leading-relaxed mb-8 flex-grow italic">
+                                "{t.content}"
+                            </p>
+
+                            {/* User Info */}
+                            <div className="mt-auto pt-6 border-t border-gray-50">
+                                <p className="text-base font-bold text-[#0F172A]">
+                                    {t.name}
+                                </p>
+                                <p className="text-sm text-[#64748B]">
+                                    {t.role}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* View More Button (Optional) */}
+                <div className="text-center mt-12">
+                    <button className="text-[#0EA5E9] font-medium hover:text-[#007C91] transition-colors inline-flex items-center group">
+                        View More Reviews
+                        <span className="block w-2 h-2 border-r-2 border-t-2 border-current transform rotate-45 ml-2 group-hover:translate-x-1 transition-transform"></span>
+                    </button>
+                </div>
             </div>
         </section>
     );

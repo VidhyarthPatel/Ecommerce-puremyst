@@ -1,4 +1,3 @@
-"use client";
 
 import Image from "next/image";
 import Amazon from "@/assets/amazon.png";
@@ -8,8 +7,8 @@ export default function TrustedBy() {
     return (
         <section className="py-12 bg-gray-50 dark:bg-ocean-900 border-b border-gray-100 dark:border-ocean-800">
             <div className="max-w-7xl mx-auto px-6">
-                <p className="text-center text-2xl font-medium mb-8 uppercase tracking-widest">
-                    Available on
+                <p className="text-center text-4xl font-medium mb-8 text-[#0EA5E9] font-semibold">
+                    PureMyst products are available on leading platforms
                 </p>
 
                 <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 ">
@@ -18,7 +17,7 @@ export default function TrustedBy() {
                     <Image
                         src={Amazon}
                         alt="Amazon"
-                        className="h-16 md:h-24 w-auto object-contain"
+                        className="h-24 md:h-24 w-auto object-contain"
                     />
 
                     {/* Flipkart */}
@@ -28,6 +27,7 @@ export default function TrustedBy() {
                         className="h-24 md:h-40 w-auto object-contain"
                     />
                 </div>
+
             </div>
         </section>
     );

@@ -10,60 +10,71 @@ import accessoriesImg from "@/assets/accessories-category.png";
 
 const categories = [
     {
-        title: "Water Purifier",
+        title: "Water Purifiers",
+        subtitle: "Advanced RO+UV Technology",
         href: "/ro-water-purifier",
         image: waterPurifierImg,
-        color: "bg-gray-100", // Neutral background for image placeholder
     },
     {
         title: "Washing Machine Filters",
+        subtitle: "Protect Your Appliances",
         href: "/washing-machine-cleaner",
         image: washingMachineFilterImg,
-        color: "bg-gray-100",
     },
     {
-        title: "Commercial Water Purifier",
+        title: "Commercial RO",
+        subtitle: "High Capacity Solutions",
         href: "/commercial-water-purifier",
         image: commercialWaterPurifierImg,
-        color: "bg-gray-100",
     },
     {
         title: "Accessories",
+        subtitle: "Filters, Spares & More",
         href: "/accessories",
         image: accessoriesImg,
-        color: "bg-gray-100",
     },
 ];
 
 export default function CategorySection() {
     return (
-        <section className="py-12 bg-white dark:bg-ocean-900">
+        <section className="py-20 bg-[#F8FAFC]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-4 gap-2 md:gap-8 justify-items-center">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-bold text-[#0F172A] mb-3 font-heading">Explore By Category</h2>
+                    <p className="text-[#475569] text-lg max-w-3xl mx-auto">Premium water purification solutions tailored for your home and business needs.</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {categories.map((category) => (
                         <Link
                             key={category.title}
                             href={category.href}
-                            className="group flex flex-col items-center text-center w-full"
+                            className="group relative flex flex-col items-center p-6 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm transition-all duration-300 ease-out hover:border-[#0EA5E9] hover:shadow-lg hover:shadow-blue-100/50"
                         >
-                            {/* Circular Image Container */}
-                            <div
-                                className={`w-16 h-16 md:w-40 md:h-40 rounded-full ${category.color} flex items-center justify-center mb-2 md:mb-4 transition-transform duration-300 group-hover:scale-105 shadow-sm group-hover:shadow-md overflow-hidden relative`}
-                            >
+                            {/* Image Container */}
+                            <div className="w-full h-40 relative mb-6 flex items-center justify-center bg-gray-50 rounded-xl group-hover:bg-blue-50/30 transition-colors">
                                 {category.image && (
-                                    <Image
-                                        src={category.image}
-                                        alt={category.title}
-                                        fill
-                                        className="object-contain p-3 md:p-4"
-                                    />
+                                    <div className="relative w-32 h-32">
+                                        <Image
+                                            src={category.image}
+                                            alt={category.title}
+                                            fill
+                                            className="object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Title */}
-                            <h3 className="text-xs md:text-lg font-medium text-gray-900 dark:text-white leading-tight group-hover:text-theme-blue transition-colors break-words w-full px-1">
-                                {category.title}
-                            </h3>
+                            {/* Content */}
+                            <div className="text-center w-full">
+                                <h3 className="text-lg font-bold text-[#0F172A] group-hover:text-[#0EA5E9] transition-colors mb-1">
+                                    {category.title}
+                                </h3>
+                                <p className="text-sm text-[#475569] font-medium">
+                                    {category.subtitle}
+                                </p>
+                            </div>
                         </Link>
                     ))}
                 </div>

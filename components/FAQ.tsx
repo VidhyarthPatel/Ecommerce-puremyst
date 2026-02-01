@@ -27,51 +27,47 @@ const faqs = [
 ];
 
 export default function FAQ() {
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-    const toggleFAQ = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
-
     return (
-        <section className="py-24 bg-white dark:bg-ocean-900">
-            <div className="max-w-3xl mx-auto px-6">
-                <h2 className="text-3xl font-semibold text-center text-gray-900 dark:text-white mb-12 tracking-tight">
-                    Frequently Asked Questions
-                </h2>
+        <section className="py-24 bg-[#F8FAFC]">
+            <div className="max-w-3xl mx-auto px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl font-bold text-[#0F172A] mb-4 font-heading">Frequently Asked Questions</h2>
+                    <p className="text-[#475569] text-lg">Everything you need to know about PureMyst products.</p>
+                </div>
+
                 <div className="space-y-4">
                     {faqs.map((faq, index) => (
-                        <div
+                        <details
                             key={index}
-                            className="border-b border-gray-100 dark:border-ocean-800 pb-4"
+                            className="group bg-white rounded-2xl border border-[#E2E8F0] shadow-sm open:border-[#0EA5E9] open:ring-1 open:ring-[#0EA5E9]/20 transition-all duration-300"
                         >
-                            <button
-                                className="w-full flex items-center justify-between py-4 text-left focus:outline-none group"
-                                onClick={() => toggleFAQ(index)}
-                            >
-                                <span className="text-lg font-medium text-gray-900 dark:text-white group-hover:text-theme-blue transition-colors">
+                            <summary className="flex items-center justify-between p-6 cursor-pointer list-none select-none">
+                                <span className="text-lg font-semibold text-[#0F172A] group-open:text-[#0EA5E9] transition-colors">
                                     {faq.question}
                                 </span>
-                                <span className="ml-4 text-gray-400 group-hover:text-theme-blue transition-colors">
-                                    {openIndex === index ? (
-                                        <Minus className="w-5 h-5" />
-                                    ) : (
-                                        <Plus className="w-5 h-5" />
-                                    )}
+                                <span className="ml-4 flex-shrink-0 text-[#22C55E]">
+                                    <Plus className="w-6 h-6 block group-open:hidden" />
+                                    <Minus className="w-6 h-6 hidden group-open:block" />
                                 </span>
-                            </button>
-                            <div
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                                    }`}
-                            >
-                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed pb-4">
+                            </summary>
+                            <div className="px-6 pb-6 pt-0">
+                                <p className="text-[#475569] leading-relaxed text-lg">
                                     {faq.answer}
                                 </p>
                             </div>
-                        </div>
+                        </details>
                     ))}
                 </div>
             </div>
+
+            <style jsx global>{`
+                details > summary {
+                    list-style: none;
+                }
+                details > summary::-webkit-details-marker {
+                    display: none;
+                }
+            `}</style>
         </section>
     );
 }

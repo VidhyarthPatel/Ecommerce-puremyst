@@ -54,23 +54,23 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
 
   return (
     <>
-      <div className="flex items-center space-x-2 md:space-x-6">
+      <div className="flex items-center space-x-2 md:space-x-4">
         {/* Search Bar - Desktop */}
         <div className="hidden lg:flex items-center relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-theme-blue transition-colors" />
+            <Search className="h-4 w-4 text-white/70 group-focus-within:text-white transition-colors" />
           </div>
           <input
             type="text"
             placeholder="Search..."
-            className="pl-10 pr-4 py-2 w-48 focus:w-64 bg-gray-100/50 dark:bg-white/5 border border-transparent focus:border-theme-blue/50 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 transition-all duration-300"
+            className="pl-10 pr-4 py-2 w-48 focus:w-64 bg-white/10 border border-transparent focus:border-white/30 rounded-full text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300"
           />
         </div>
 
         {/* Search Icon - Mobile */}
         <button
           onClick={() => setSearchOpen(!searchOpen)}
-          className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-theme-blue dark:hover:text-theme-blue transition-colors"
+          className="lg:hidden p-2 text-white hover:text-blue-200 transition-colors"
         >
           <Search size={22} />
         </button>
@@ -78,11 +78,11 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
         {/* Cart */}
         <Link
           href="/cart"
-          className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-theme-blue dark:hover:text-theme-blue transition-colors group"
+          className="relative p-2 text-white hover:text-blue-200 transition-colors group"
         >
           <ShoppingBag size={22} className="group-hover:scale-110 transition-transform duration-200" />
           {cartCount > 0 && isMounted && (
-            <span className="absolute -top-0.5 -right-0.5 bg-theme-blue text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-bounce-once shadow-sm ring-2 ring-white dark:ring-blue-900">
+            <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-bounce-once shadow-sm ring-2 ring-[#007C91]">
               {cartCount}
             </span>
           )}
@@ -91,7 +91,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-theme-blue dark:hover:text-theme-blue transition-colors"
+          className="lg:hidden p-2 text-white hover:text-blue-200 transition-colors"
         >
           <Menu size={24} />
         </button>
