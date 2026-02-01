@@ -70,7 +70,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
         {/* Search Icon - Mobile */}
         <button
           onClick={() => setSearchOpen(!searchOpen)}
-          className="lg:hidden p-2 text-white hover:text-blue-200 transition-colors"
+          className="lg:hidden p-2 text-white hover:text-cyan-100 transition-colors"
         >
           <Search size={22} />
         </button>
@@ -78,7 +78,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
         {/* Cart */}
         <Link
           href="/cart"
-          className="relative p-2 text-white hover:text-blue-200 transition-colors group"
+          className="relative p-2 text-white hover:text-cyan-100 transition-colors group"
         >
           <ShoppingBag size={22} className="group-hover:scale-110 transition-transform duration-200" />
           {cartCount > 0 && isMounted && (
@@ -91,7 +91,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="lg:hidden p-2 text-white hover:text-blue-200 transition-colors"
+          className="lg:hidden p-2 text-white hover:text-cyan-100 transition-colors"
         >
           <Menu size={24} />
         </button>
@@ -101,7 +101,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
       {isMounted &&
         createPortal(
           <div
-            className={`fixed inset-0 z-[9999] bg-white dark:bg-blue-900 transition-transform duration-300 ease-in-out lg:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
+            className={`fixed inset-0 z-[9999] bg-white dark:bg-[#004D5A] transition-transform duration-300 ease-in-out lg:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
               }`}
           >
             <div className="flex flex-col h-full">
@@ -123,7 +123,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
                         <div>
                           <button
                             onClick={() => toggleAccordion(item.label)}
-                            className="flex items-center justify-between w-full text-2xl font-light tracking-tight text-gray-900 dark:text-white hover:text-theme-blue py-2"
+                            className="flex items-center justify-between w-full text-2xl font-light tracking-tight text-gray-900 dark:text-white hover:text-[#007C91] py-2"
                           >
                             {item.label}
                             {expandedItem === item.label ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -139,8 +139,8 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
                                   href={subItem.href}
                                   onClick={() => setMenuOpen(false)}
                                   className={`text-lg font-light ${subItem.highlight
-                                    ? "text-theme-blue font-normal"
-                                    : "text-gray-600 dark:text-gray-300 hover:text-theme-blue"
+                                    ? "text-[#007C91] font-normal"
+                                    : "text-gray-600 dark:text-gray-300 hover:text-[#007C91]"
                                     }`}
                                 >
                                   {subItem.label}
@@ -155,7 +155,7 @@ export default function NavClient({ navItems }: { navItems: NavItem[] }) {
                           onClick={() => setMenuOpen(false)}
                           className={`block text-2xl font-light tracking-tight py-2 ${item.highlight
                             ? "text-red-500 font-normal"
-                            : "text-gray-900 dark:text-white hover:text-theme-blue"
+                            : "text-gray-900 dark:text-white hover:text-[#007C91]"
                             }`}
                         >
                           {item.label}

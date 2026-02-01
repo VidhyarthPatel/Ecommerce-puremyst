@@ -77,7 +77,7 @@ export default function NavServer() {
                   <div className="relative">
                     <button
                       type="button"
-                      className="flex items-center text-sm font-medium text-white hover:text-blue-200 transition-colors duration-200 focus:outline-none"
+                      className="flex items-center text-sm font-medium text-white hover:text-cyan-100 transition-colors duration-200 focus:outline-none"
                     >
                       {item.label}
                       <ChevronDown className="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
@@ -92,8 +92,8 @@ export default function NavServer() {
                             key={dropdownItem.label}
                             href={dropdownItem.href}
                             className={`px-4 py-3 text-sm rounded-lg transition-all duration-200 flex items-center justify-between group/item ${dropdownItem.highlight
-                              ? "bg-blue-50 text-blue-600 font-semibold"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                              ? "bg-[#007C91]/5 text-[#007C91] font-semibold"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-[#007C91]"
                               }`}
                           >
                             {dropdownItem.label}
@@ -108,12 +108,12 @@ export default function NavServer() {
                     href={item.href || "#"}
                     className={`relative text-sm font-medium transition-colors duration-200 ${item.highlight
                       ? "text-red-300 hover:text-red-100"
-                      : "text-white hover:text-blue-200"
+                      : "text-white hover:text-cyan-100"
                       }`}
                   >
                     {item.label}
                     {!item.highlight && (
-                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-200 transition-all duration-300 group-hover:w-full" />
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
                     )}
                   </Link>
                 )}
