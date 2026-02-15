@@ -9,51 +9,7 @@ import ProductReviews from "@/components/ProductReviews";
 import ProductFAQ from "@/components/ProductFAQ";
 import RelatedProducts from "@/components/RelatedProducts";
 
-// Sample data for sections that might not be in the database yet
-const defaultSpecs = [
-  { label: "Filter Type", value: "Multi-stage Purification" },
-  { label: "Technology", value: "RO + UV + UF" },
-  { label: "Capacity", value: "7-10 Liters" },
-  { label: "Power Consumption", value: "60W" },
-  { label: "Warranty", value: "1 Year" },
-  { label: "Dimensions", value: "Standard" },
-];
-
-const defaultReviews = [
-  {
-    id: 1,
-    name: "Satisfied Customer",
-    rating: 5,
-    date: "2 weeks ago",
-    comment: "Excellent product! Highly recommended for quality and performance.",
-    verified: true,
-  },
-  {
-    id: 2,
-    name: "Happy User",
-    rating: 4,
-    date: "1 month ago",
-    comment: "Good quality product. Value for money.",
-    verified: true,
-  },
-];
-
-const defaultFAQs = [
-  {
-    question: "How long is the warranty period?",
-    answer: "This product comes with a 1-year manufacturer warranty covering all manufacturing defects.",
-  },
-  {
-    question: "Is installation included?",
-    answer: "Installation services may be available in select areas. Please contact customer support for details.",
-  },
-  {
-    question: "What is the return policy?",
-    answer: "We offer a 7-day return policy for unopened products in original packaging.",
-  },
-];
-
-export default function ProductDetailClient({ product }: { product: any }) {
+export default function ProductDetailClient({ product, relatedProducts = [] }: { product: any, relatedProducts?: any[] }) {
   const { addToCart, loading } = useCart();
   const [quantity, setQuantity] = useState(1);
 
@@ -62,53 +18,49 @@ export default function ProductDetailClient({ product }: { product: any }) {
     id: product.id,
     slug: product.slug,
     name: product.name,
-    description: product.description || "Premium quality product from PureMyst",
+    description: product.description || "",
     price: product.price,
     originalPrice: product.originalPrice || null,
     images: product.ProductsImage?.map((img: any) => img.imageUrl) || ["/placeholder.png"],
-    highlights: product.keyFeatures && product.keyFeatures.length > 0 ? product.keyFeatures : [
-      "Premium quality materials",
-      "Easy installation",
-      "Long-lasting performance",
-      "Certified and tested",
-      "1-year warranty included",
-    ],
+    highlights: product.keyFeatures || [],
     inStock: product.units > 0,
   };
 
-  // Get related products (you can fetch these from API later)
-  const relatedProducts = [
-    {
-      id: "1",
-      name: "Related Product 1",
-      price: 999,
-      image: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
-      rating: 4.5,
-      slug: "related-1",
-    },
-    {
-      id: "2",
-      name: "Related Product 2",
-      price: 1299,
-      originalPrice: 1999,
-      image: product.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
-      rating: 4.7,
-      slug: "related-2",
-    },
-  ];
+  // Map related products to the format expected by RelatedProducts component
+  const mappedRelatedProducts = relatedProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    originalPrice: p.discount ? p.price / (1 - p.discount / 100) : undefined,
+    image: p.ProductsImage?.[0]?.imageUrl || "/placeholder.png",
+    rating: p.rating || 0,
+    slug: p.slug,
+  }));
 
   return (
-    <main className="min-h-screen bg-white dark:bg-ocean-900 mt-20">
+    <div className="min-h-screen bg-white dark:bg-ocean-900">
       <ProductShowcase product={productData} />
       <ProductFeatures />
-      <ProductSpecs specs={product.specifications || defaultSpecs} />
-      <ProductReviews
-        reviews={product.reviews || defaultReviews}
-        averageRating={product.rating || 4.5}
-        totalReviews={product.reviewCount || 50}
-      />
-      {product.faqs && product.faqs.length > 0 && <ProductFAQ faqs={product.faqs} />}
-      <RelatedProducts products={relatedProducts} />
-    </main>
+
+      {product.specifications && product.specifications.length > 0 && (
+        <ProductSpecs specs={product.specifications} />
+      )}
+
+      {product.reviews && product.reviews.length > 0 && (
+        <ProductReviews
+          reviews={product.reviews}
+          averageRating={product.rating || 0}
+          totalReviews={product.reviewCount || 0}
+        />
+      )}
+
+      {product.faqs && product.faqs.length > 0 && (
+        <ProductFAQ faqs={product.faqs} />
+      )}
+
+      {mappedRelatedProducts.length > 0 && (
+        <RelatedProducts products={mappedRelatedProducts} />
+      )}
+    </div>
   );
 }

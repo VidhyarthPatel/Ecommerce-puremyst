@@ -16,6 +16,7 @@ const productSchema = z.object({
   images: z.array(z.string().url()).optional(),
   category: z.string().min(1, "Category is required"),
   keyFeatures: z.array(z.string()).optional(),
+  specifications: z.array(z.object({ label: z.string(), value: z.string() })).optional(),
   faqs: z.array(z.object({ question: z.string(), answer: z.string() })).optional(),
 });
 
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
         featured: rest.featured ?? false,
         rating: rest.rating ?? 0,
         keyFeatures: rest.keyFeatures ?? [],
+        specifications: rest.specifications ?? [],
         ProductsImage: {
           create: (images ?? []).map((url) => ({ imageUrl: url })),
         },
@@ -122,6 +124,7 @@ export async function PUT(req: Request) {
         featured: rest.featured ?? false,
         rating: rest.rating ?? 0,
         keyFeatures: rest.keyFeatures ?? [],
+        specifications: rest.specifications ?? [],
         ProductsImage: {
           deleteMany: {}, // clear old
           create: (images ?? []).map((url) => ({ imageUrl: url })),

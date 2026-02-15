@@ -1,4 +1,14 @@
 import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | PureMyst",
+  description: "Read PureMyst's privacy policy to understand how we collect, use, and protect your personal information.",
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function PrivacyPolicy() {
   return (

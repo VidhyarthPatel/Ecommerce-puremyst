@@ -1,8 +1,36 @@
 import React from 'react';
+import { Metadata } from 'next';
+import FAQ from "@/components/FAQ";
+import { FAQS } from "@/lib/constants";
+import Script from "next/script";
+
+export const metadata: Metadata = {
+  title: "Contact PureMyst | Customer Support & Service",
+  description: "Contact PureMyst for water purifier support, installation, and service inquiries. Reach us via email, phone, or WhatsApp.",
+  keywords: ["PureMyst Contact", "Water Purifier Customer Care", "RO Service Center", "Water Filter Support"],
+};
 
 export default function ContactPage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQS.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div className="bg-white text-gray-900 font-sans pt-20 pb-20">
+      <Script
+        id="faq-schema-contact"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -71,6 +99,7 @@ export default function ContactPage() {
 
         </div>
       </div>
+      <FAQ faqs={FAQS} />
     </div>
   );
 }

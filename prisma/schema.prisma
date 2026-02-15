@@ -19,6 +19,7 @@ model Products {
   units       Int      @default(5)
   category    String
   keyFeatures String[]
+  specifications Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

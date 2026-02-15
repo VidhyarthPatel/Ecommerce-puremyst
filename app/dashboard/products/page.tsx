@@ -44,6 +44,7 @@ type Product = {
   units: number;
   category: string;
   keyFeatures: string[];
+  specifications?: { label: string; value: string }[];
   faqs?: { question: string; answer: string }[];
   ProductsImage?: { id: string; imageUrl: string }[];
 };
@@ -71,6 +72,7 @@ export default function EnhancedInventoryPage() {
     name: "", price: "", units: "", description: "",
     category: CATEGORIES[0], images: [] as string[],
     rating: "0", featured: false, keyFeatures: [] as string[],
+    specifications: [] as { label: string; value: string }[],
     faqs: [] as { question: string; answer: string }[],
   });
 
@@ -81,9 +83,18 @@ export default function EnhancedInventoryPage() {
       setLoading(true);
       const res = await fetch("/api/products");
       const data = await res.json();
-      setProducts(data);
+
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        console.error("API returned non-array:", data);
+        setProducts([]);
+        toast.error("Received invalid data from server");
+      }
     } catch (err) {
+      console.error("Fetch error:", err);
       toast.error("Failed to load inventory");
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -110,6 +121,7 @@ export default function EnhancedInventoryPage() {
         rating: product.rating.toString(),
         featured: product.featured,
         keyFeatures: product.keyFeatures || [],
+        specifications: product.specifications || [],
         faqs: product.faqs || [],
       });
     } else {
@@ -117,7 +129,7 @@ export default function EnhancedInventoryPage() {
       setFormData({
         name: "", price: "", units: "", description: "",
         category: CATEGORIES[0], images: [], rating: "0",
-        featured: false, keyFeatures: [], faqs: [],
+        featured: false, keyFeatures: [], specifications: [], faqs: [],
       });
     }
     setIsSheetOpen(true);
@@ -448,6 +460,7 @@ export default function EnhancedInventoryPage() {
                 </TabsContent>
 
                 <TabsContent value="specs" className="space-y-6">
+                  {/* Key Features Section */}
                   <div className="space-y-4">
                     <Label className="text-sm font-bold uppercase tracking-wider text-slate-400">Key Features List</Label>
                     {formData.keyFeatures.map((f, i) => (
@@ -464,6 +477,56 @@ export default function EnhancedInventoryPage() {
                     ))}
                     <Button variant="outline" className="w-full border-dashed h-10 border-slate-300 hover:bg-slate-50 text-xs" onClick={() => setFormData({ ...formData, keyFeatures: [...formData.keyFeatures, ""] })}>
                       <Plus className="w-3 h-3 mr-2" /> Add Feature
+                    </Button>
+                  </div>
+
+                  <div className="border-t border-slate-200 my-4" />
+
+                  {/* Technical Specifications Section */}
+                  <div className="space-y-4">
+                    <Label className="text-sm font-bold uppercase tracking-wider text-slate-400">Technical Specifications</Label>
+                    {formData.specifications.map((spec, i) => (
+                      <div key={i} className="space-y-2 p-3 border rounded-lg bg-slate-50/50 relative group animate-in slide-in-from-left-2 duration-200">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-1 right-1 h-7 w-7 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setFormData({ ...formData, specifications: formData.specifications.filter((_, idx) => idx !== i) })}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase">Label</Label>
+                            <Input
+                              value={spec.label}
+                              onChange={e => {
+                                const newSpecs = [...formData.specifications];
+                                newSpecs[i] = { ...newSpecs[i], label: e.target.value };
+                                setFormData({ ...formData, specifications: newSpecs });
+                              }}
+                              className="h-8 text-xs font-semibold"
+                              placeholder="e.g. Filter Type"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase">Value</Label>
+                            <Input
+                              value={spec.value}
+                              onChange={e => {
+                                const newSpecs = [...formData.specifications];
+                                newSpecs[i] = { ...newSpecs[i], value: e.target.value };
+                                setFormData({ ...formData, specifications: newSpecs });
+                              }}
+                              className="h-8 text-xs"
+                              placeholder="e.g. RO + UV"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full border-dashed h-10 border-slate-300 hover:bg-slate-50 text-xs" onClick={() => setFormData({ ...formData, specifications: [...formData.specifications, { label: "", value: "" }] })}>
+                      <Plus className="w-3 h-3 mr-2" /> Add Specification
                     </Button>
                   </div>
                 </TabsContent>

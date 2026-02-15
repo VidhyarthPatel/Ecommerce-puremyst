@@ -42,12 +42,64 @@ interface GuestOrder {
   createdAt: string;
 }
 
+import { Skeleton } from "@/components/ui/skeleton";
+// ... imports
+
 export default function OrderConfirmationPage() {
   const params = useParams();
   const orderId = params.id as string;
   const [order, setOrder] = useState<GuestOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Skeleton Component
+  const OrderSkeleton = () => (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-center space-y-4 mb-12">
+          <Skeleton className="w-24 h-24 rounded-full" />
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
+              <Skeleton className="h-6 w-48" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-5 w-full max-w-md" />
+                <Skeleton className="h-5 w-40" />
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl p-6 shadow-sm h-64 space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-8 w-full mt-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -57,7 +109,7 @@ export default function OrderConfirmationPage() {
           throw new Error("Order not found");
         }
         const orderData = await response.json();
-        setOrder(orderData);
+        setOrder(orderData.order);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch order");
       } finally {
@@ -71,14 +123,7 @@ export default function OrderConfirmationPage() {
   }, [orderId]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading order details...</p>
-        </div>
-      </div>
-    );
+    return <OrderSkeleton />;
   }
 
   if (error || !order) {

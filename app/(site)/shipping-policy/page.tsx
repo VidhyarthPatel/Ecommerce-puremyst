@@ -1,3 +1,14 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Shipping Policy | PureMyst",
+  description: "Information about PureMyst's shipping delivery timelines, charges, and tracking.",
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
+
 export default function ShippingPolicy() {
   return (
     <div className="min-h-screen bg-white text-gray-900 px-4 sm:px-6 py-16">
@@ -27,11 +38,11 @@ export default function ShippingPolicy() {
               </div>
               <div className="text-gray-600 leading-relaxed space-y-4 text-lg">
                 <p>
-                  All orders are processed within <span className="font-medium text-gray-900">1–2 business days</span> from the time of order confirmation. 
+                  All orders are processed within <span className="font-medium text-gray-900">1–2 business days</span> from the time of order confirmation.
                   Our team carefully verifies each order to ensure accuracy and completeness before dispatch.
                 </p>
                 <p>
-                  During peak seasons or promotional periods, processing may take up to 3 business days. 
+                  During peak seasons or promotional periods, processing may take up to 3 business days.
                   You'll receive an order confirmation email immediately after purchase, followed by a shipping confirmation with tracking details once your water purifier has been dispatched from our warehouse.
                 </p>
                 <div className="text-base text-gray-500 bg-blue-50 p-4 rounded-xl">
@@ -50,7 +61,7 @@ export default function ShippingPolicy() {
               </div>
               <div className="text-gray-600 space-y-6 text-lg">
                 <p>
-                  Delivery times are calculated from the date of dispatch and vary based on your location and product availability. 
+                  Delivery times are calculated from the date of dispatch and vary based on your location and product availability.
                   Our logistics partners ensure safe and timely delivery of your water purification system.
                 </p>
                 <div className="space-y-4 bg-gray-50 p-6 rounded-xl">
@@ -68,7 +79,7 @@ export default function ShippingPolicy() {
                   </div>
                 </div>
                 <div className="text-base text-gray-500">
-                  <strong>Important:</strong> These timelines are estimates and may vary due to unforeseen circumstances. 
+                  <strong>Important:</strong> These timelines are estimates and may vary due to unforeseen circumstances.
                   Installation scheduling for complex systems may require additional coordination.
                 </div>
               </div>
@@ -84,7 +95,7 @@ export default function ShippingPolicy() {
               </div>
               <div className="text-gray-600 leading-relaxed space-y-4 text-lg">
                 <p>
-                  Once your order is dispatched, you'll receive a tracking number via email and SMS. 
+                  Once your order is dispatched, you'll receive a tracking number via email and SMS.
                   Use this to monitor your water purifier's journey in real-time through our partner courier's platform.
                 </p>
                 <p>
@@ -122,7 +133,7 @@ export default function ShippingPolicy() {
                   <li>Recipient unavailable during delivery attempts</li>
                 </ul>
                 <p>
-                  For failed delivery attempts, our courier partner will typically make 2 additional attempts. 
+                  For failed delivery attempts, our courier partner will typically make 2 additional attempts.
                   After 3 failed attempts, the package will be returned to our facility, and restocking fees may apply.
                 </p>
               </div>
@@ -138,7 +149,7 @@ export default function ShippingPolicy() {
               </div>
               <div className="text-gray-600 leading-relaxed space-y-4 text-lg">
                 <p>
-                  Most PureMyst water purifiers include professional installation service. 
+                  Most PureMyst water purifiers include professional installation service.
                   Our certified technicians will contact you within 24 hours of delivery to schedule the installation at your convenience.
                 </p>
                 <p>
@@ -171,11 +182,11 @@ export default function ShippingPolicy() {
               </div>
               <div className="text-gray-600 space-y-4 text-base">
                 <p>
-                  We offer <span className="font-medium text-blue-600">free standard shipping</span> on all orders above ₹999. 
+                  We offer <span className="font-medium text-blue-600">free standard shipping</span> on all orders above ₹999.
                   This includes delivery to your doorstep and basic handling.
                 </p>
                 <p>
-                  For orders below ₹999, a nominal delivery fee of ₹99 applies. 
+                  For orders below ₹999, a nominal delivery fee of ₹99 applies.
                   Additional charges may apply for:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">

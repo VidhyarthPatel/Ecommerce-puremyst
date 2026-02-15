@@ -88,7 +88,7 @@ export default function RazorpayCheckoutButton({
       const createJson = await createResp.json();
       if (!createResp.ok || !createJson.ok) {
         console.error("create-order error", createJson);
-        throw new Error(createJson.error || "Failed to create order");
+        throw new Error(createJson.error || "Failed to create order. Please check your contact information or contact support.");
       }
 
       const { razorpayOrderId, amountPaise, currency, guestOrderId, key } = createJson;
@@ -134,7 +134,7 @@ export default function RazorpayCheckoutButton({
             try {
               localStorage.removeItem("ecommerce_cart");
               window.dispatchEvent(new Event("cartUpdated"));
-            } catch (e) {}
+            } catch (e) { }
 
             const successOrderId = verifyJson.guestOrderId ?? guestOrderId;
             if (successOrderId) {

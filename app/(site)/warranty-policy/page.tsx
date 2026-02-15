@@ -1,4 +1,14 @@
 import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Warranty Policy | PureMyst",
+    description: "Details on warranty coverage for PureMyst water purifiers and components.",
+    robots: {
+        index: false,
+        follow: true,
+    },
+};
 
 export default function WarrantyPolicy() {
     return (

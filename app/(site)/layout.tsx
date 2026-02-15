@@ -25,19 +25,19 @@ export const metadata = {
 };
 
 
-export default function RootLayout({
+export default function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
-      <body className="antialiased">
-        <Nav />
+    <div className={`${inter.variable} ${robotoMono.variable} antialiased`}>
+      <Nav />
+      <main className="pt-24 bg-white dark:bg-ocean-900 min-h-screen">
         <ScrollToTopOnNavigation />
         <Providers>{children}</Providers>
-        <Footer />
-      </body>
-    </html>
+      </main>
+      <Footer />
+    </div>
   );
 }

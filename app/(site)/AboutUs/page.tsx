@@ -1,9 +1,38 @@
 import Image from "next/image";
 import AboutIMG from "@/assets/aboutIMG.png";
+import { Metadata } from 'next';
+import FAQ from "@/components/FAQ";
+import { FAQS } from "@/lib/constants";
+import Script from "next/script";
+
+export const metadata: Metadata = {
+  title: "About PureMyst | Advanced Water Purification Solutions",
+  description: "Learn about PureMyst's mission to provide safe, clean drinking water with advanced RO, UV, and UF technology. Trusted by families across India.",
+  keywords: ["PureMyst Brand", "Water Purifier Company", "Safe Drinking Water Mission", "RO Technology Experts"],
+};
 
 export default function AboutUs() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQS.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div className="bg-white text-gray-900 pt-20 pb-20 font-sans">
+      <Script
+        id="faq-schema-about"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -102,6 +131,7 @@ export default function AboutUs() {
         </div>
 
       </div>
+      <FAQ faqs={FAQS} />
     </div>
   );
 }

@@ -1,4 +1,14 @@
 import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Return & Refund Policy | PureMyst",
+    description: "Understand PureMyst's return and refund policy for water purifiers and accessories.",
+    robots: {
+        index: false,
+        follow: true,
+    },
+};
 
 export default function ReturnRefundPolicy() {
     return (

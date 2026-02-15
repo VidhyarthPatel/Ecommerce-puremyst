@@ -17,7 +17,7 @@ const ItemSchema = z.object({
 const CustomerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
-  phone: z.string().min(10).max(10),
+  phone: z.string().min(10).max(15), // relaxed validation (e.g. +91...)
   address: z.string().min(3).max(100),
   city: z.string().min(1).max(50),
   state: z.string().min(1).max(50),
@@ -30,24 +30,27 @@ const CreateOrderSchema = z.object({
   shippingRupees: z.number().nonnegative().optional(),
 });
 
-// read envs once
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+// removed static initialization to pick up env changes dynamically
 
-if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-  console.warn(
-    "Warning: Razorpay keys not set. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env"
-  );
-}
-
-const razorpay = new Razorpay({
-  key_id: RAZORPAY_KEY_ID ?? "",
-  key_secret: RAZORPAY_KEY_SECRET ?? "",
-});
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+
+    if (id) {
+      const order = await prisma.guestOrder.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+
+      if (!order) {
+        return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ ok: true, order });
+    }
+
     const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
     const perPage = Math.min(100, Math.max(1, Number(url.searchParams.get("perPage") ?? 10)));
     const status = (url.searchParams.get("status") ?? "all").toLowerCase();
@@ -110,6 +113,23 @@ export async function POST(req: NextRequest) {
 
     const { customer, items, shippingRupees } = parse.data;
 
+    const rzp_id = process.env.RAZORPAY_KEY_ID;
+    const rzp_secret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!rzp_id || !rzp_secret) {
+      console.error("Razorpay keys missing in .env");
+      return NextResponse.json(
+        { ok: false, error: "Razorpay configuration missing (Key ID or Secret)" },
+        { status: 500 }
+      );
+    }
+
+    const razorpay = new Razorpay({
+      key_id: rzp_id,
+      key_secret: rzp_secret,
+    });
+
+
     // compute totals server-side (rupees, as your schema uses Float)
     const subtotal = items.reduce((s, it) => s + it.productPrice * it.quantity, 0);
     const shipping = typeof shippingRupees === "number" ? shippingRupees : 0; // Removed dummy 40
@@ -167,7 +187,12 @@ export async function POST(req: NextRequest) {
         notes: { guestOrderId: createdOrder.id, source: "puremyst" },
       });
     } catch (rzErr: any) {
-      console.error("Razorpay create order error:", rzErr);
+      console.error("Razorpay create order error detail:", {
+        error: rzErr,
+        amount: totalPaise,
+        receipt,
+        keysConfigured: !!(rzp_id && rzp_secret)
+      });
       // Optionally rollback DB order or mark it failed. For now, return error.
       return NextResponse.json(
         { ok: false, error: "Payment gateway error creating order" },
@@ -187,7 +212,7 @@ export async function POST(req: NextRequest) {
         razorpayOrderId: rzpOrder.id,
         amountPaise: totalPaise,
         currency: rzpOrder.currency ?? "INR",
-        key: RAZORPAY_KEY_ID,
+        key: rzp_id,
       },
       { status: 200 }
     );
