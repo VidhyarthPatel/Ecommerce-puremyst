@@ -16,9 +16,9 @@ interface ProductWithRelations {
   ProductsImage: { imageUrl: string }[];
   faqs: { question: string; answer: string }[];
   keyFeatures?: string[];
-  keyFeatures?: string[];
   specifications?: any;
   reviews?: any[];
+  category: string;
 }
 
 // Helper to fetch product data
