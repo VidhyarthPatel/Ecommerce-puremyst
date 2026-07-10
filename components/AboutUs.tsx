@@ -1,70 +1,144 @@
 "use client";
-import React from "react";
-import Link from "next/link";
+import React, { useEffect, useState, useRef } from "react";
 import aboutImg from "@/assets/aboutIMG.png";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
+
+function AnimatedCounter({ target, suffix, duration = 2000, decimals = 0 }: { target: number; suffix: string; duration?: number; decimals?: number }) {
+  const [count, setCount] = useState(0);
+  const elementRef = useRef<HTMLSpanElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let start = 0;
+    const end = target;
+    const totalMiliseconds = duration;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / totalMiliseconds, 1);
+
+      // Ease out quad formula: progress * (2 - progress)
+      const easeProgress = progress * (2 - progress);
+
+      const currentValue = start + easeProgress * (end - start);
+      setCount(currentValue);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [isVisible, target, duration]);
+
+  return (
+    <span ref={elementRef}>
+      {count.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+      {suffix}
+    </span>
+  );
+}
 
 export default function AboutUs() {
-  return (
-    <section className="py-24 bg-white dark:bg-ocean-900 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-          {/* Image Side */}
-          <div className="w-full lg:w-1/2 relative">
-            <div className="absolute inset-0 bg-teal-500/10 rounded-3xl transform rotate-3 scale-105" />
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src={aboutImg.src}
-                alt="About PureMyst"
-                className="w-full h-full object-cover"
-              />
-            </div>
+  const bulletPoints = [
+    "Advanced RO+UV Tech",
+    "Smart Water Monitoring",
+    "Mineral Retention",
+    "Eco-Friendly Design",
+    "Certified Quality Materials",
+    "24/7 Service Support"
+  ];
 
-            {/* Floating Stats Card */}
-            <div className="absolute -bottom-8 -right-8 bg-white dark:bg-ocean-800 p-8 rounded-2xl shadow-xl hidden md:block">
-              <div className="flex flex-col gap-1">
-                <span className="text-4xl font-bold text-[#0A2540] dark:text-white">10k+</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">Happy Customers</span>
-              </div>
-            </div>
+  const stats = [
+    { target: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
+    { target: 25, suffix: "M+", decimals: 0, label: "Liters Purified" },
+    { target: 99.9, suffix: "%", decimals: 1, label: "Purity Guaranteed" },
+    { target: 10, suffix: "+", decimals: 0, label: "Years of Trust" }
+  ];
+
+  return (
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Main Split Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+          
+          {/* Left: Image */}
+          <div className="relative group rounded-md overflow-hidden shadow-md aspect-[4/3] sm:aspect-[1.4] lg:aspect-auto lg:h-[450px]">
+            <img
+              src={aboutImg.src}
+              alt="PureMyst Team and Water Technology"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            />
           </div>
 
-          {/* Content Side */}
-          <div className="w-full lg:w-1/2">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-              Committed to Providing <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-blue-600">
-                Pure & Safe Water
-              </span>
+          {/* Right: Content details */}
+          <div className="text-left lg:pl-6">
+            <span className="text-sm font-bold text-[#0b6c2c] uppercase tracking-wider block mb-3">About Us</span>
+            <h2 className="text-4xl lg:text-5xl font-bold text-[#1c2b4b] leading-tight mb-4">
+              Purity in Every Drop, Trust in Every Home
             </h2>
+            
+            {/* Two Accent Lines */}
+            <div className="flex space-x-1.5 mb-6">
+              <div className="h-0.5 w-8 bg-[#0b6c2c]"></div>
+              <div className="h-0.5 w-4 bg-[#0b6c2c]"></div>
+            </div>
 
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              At PureMyst, we believe everyone deserves access to clean, healthy drinking water. Our advanced purification systems combine cutting-edge technology with elegant design to deliver the best water quality for your home and business.
+            <p className="text-gray-500 text-sm leading-relaxed mb-8">
+              At PureMyst, we are dedicated to providing clean, healthy, and premium drinking water solutions for your home and office. Our advanced filtration systems combine cutting-edge technology with elegant design to deliver the ultimate purity.
             </p>
 
-            <div className="space-y-4 mb-10">
-              {[
-                "Advanced RO+UV+UF Technology",
-                "Smart Monitoring Systems",
-                "Eco-friendly & Water Saving",
-                "Certified Quality Standards"
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-teal-500 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-200">{item}</span>
+            {/* 2-Column Bullet List */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mb-8">
+              {bulletPoints.map((point, index) => (
+                <div key={index} className="flex items-center space-x-2.5 text-xs font-semibold text-gray-500">
+                  <span className="w-4 h-4 rounded-full bg-[#0b6c2c] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                  </span>
+                  <span>{point}</span>
                 </div>
               ))}
             </div>
-
-            <Link
-              href="/about"
-              className="inline-flex items-center text-[#0A2540] dark:text-white font-semibold group"
-            >
-              Read Our Story
-              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Link>
           </div>
+
         </div>
+
+        {/* Divider Line */}
+        <div className="w-full h-px bg-gray-100 mb-16"></div>
+
+        {/* Bottom: Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {stats.map((stat, index) => (
+            <div key={index} className="flex flex-col">
+              <span className="text-5xl font-semibold text-gray-800 mb-2">
+                <AnimatedCounter target={stat.target} suffix={stat.suffix} decimals={stat.decimals} />
+              </span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+
       </div>
     </section>
   );

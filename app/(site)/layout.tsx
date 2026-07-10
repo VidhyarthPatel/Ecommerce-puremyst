@@ -33,7 +33,7 @@ export default function SiteLayout({
   return (
     <div className={`${inter.variable} ${robotoMono.variable} antialiased`}>
       <Nav />
-      <main className="pt-24 bg-white dark:bg-ocean-900 min-h-screen">
+      <main className="pt-[128px] lg:pt-[145px] bg-white dark:bg-ocean-900 min-h-screen">
         <ScrollToTopOnNavigation />
         <Providers>{children}</Providers>
       </main>

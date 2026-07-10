@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ArrowRight, Droplet, Leaf } from "lucide-react";
 
 type Product = {
     id: string;
@@ -17,7 +17,6 @@ type Product = {
 export default function BestSelling() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-    const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchProducts() {
@@ -36,110 +35,87 @@ export default function BestSelling() {
         fetchProducts();
     }, []);
 
-    const scroll = (direction: "left" | "right") => {
-        if (scrollRef.current) {
-            const { scrollLeft, clientWidth } = scrollRef.current;
-            const scrollTo = direction === "left"
-                ? scrollLeft - clientWidth
-                : scrollLeft + clientWidth;
-
-            scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
-        }
-    };
-
-    if (loading || products.length === 0) return null;
+    if (loading) return null;
 
     return (
-        <section className="py-20 bg-[#F8FAFC]">
+        <section className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Section Header with Navigation Controls */}
-                <div className="relative flex items-end justify-center mb-12">
-                    <div className="text-center">
-                        <h2 className="text-3xl font-bold text-[#0F172A] mb-3 font-heading">Best Sellers</h2>
-                        <p className="text-[#475569] text-lg">Loved by our customers.</p>
-                    </div>
-
-                    {/* Desktop Navigation Buttons */}
-                    <div className="hidden md:flex space-x-3 absolute right-0 bottom-1">
-                        <button
-                            onClick={() => scroll("left")}
-                            className="p-3 rounded-full border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#0EA5E9] hover:text-white transition-all shadow-sm"
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        <button
-                            onClick={() => scroll("right")}
-                            className="p-3 rounded-full border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#0EA5E9] hover:text-white transition-all shadow-sm"
-                        >
-                            <ChevronRight size={24} />
-                        </button>
-                    </div>
+                {/* Section Header */}
+                <div className="flex justify-between items-end mb-8">
+                    <h2 className="text-3xl font-bold text-[#1c2b4b]">Bestselling Systems</h2>
+                    <Link href="/products" className="text-sm font-semibold text-[#0b6c2c] hover:underline flex items-center">
+                        View All <ArrowRight size={16} className="ml-1" />
+                    </Link>
                 </div>
 
-                {/* Horizontal Scroll Container */}
-                <div
-                    ref={scrollRef}
-                    className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-8"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                    {products.map((product) => (
-                        <div
-                            key={product.id}
-                            className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] snap-start group relative bg-white rounded-2xl border border-[#E2E8F0] p-4 shadow-sm transition-all duration-300 hover:border-[#0EA5E9] hover:shadow-lg flex flex-col"
-                        >
-                            {/* Product Image */}
-                            <Link href={`/products/${product.slug}`} className="block relative aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* Dynamic Products */}
+                    {products.slice(0, 4).map((product, index) => (
+                        <div key={product.id} className="group relative bg-white flex flex-col">
+                            {/* Image Container */}
+                            <Link href={`/products/${product.slug}`} className="block relative aspect-square mb-4 border border-gray-100 rounded-sm overflow-hidden flex items-center justify-center p-4">
                                 <img
                                     src={product.ProductsImage?.[0]?.imageUrl || "/placeholder.png"}
                                     alt={product.name}
-                                    className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                                 />
-                                {product.discount && (
-                                    <span className="absolute top-3 left-3 bg-[#22C55E] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-md">
-                                        {product.discount}% OFF
+                                {product.featured && (
+                                    <span className="absolute top-0 left-0 bg-[#e87042] text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">
+                                        Bestseller
                                     </span>
                                 )}
                             </Link>
 
                             {/* Content */}
-                            <div className="flex flex-col flex-grow">
-                                <div className="flex items-center mb-2 space-x-1">
-                                    <div className="flex text-yellow-400">
+                            <div className="flex flex-col flex-grow text-left">
+                                <div className="flex items-center mb-1 space-x-1">
+                                    <div className="flex text-[#F59E0B]">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating) ? "fill-current" : "text-gray-200"}`} />
+                                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating || 5) ? "fill-current" : "text-gray-200"}`} />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-[#94A3B8]">({product.rating})</span>
+                                    <span className="text-[10px] text-gray-500">({product.rating > 0 ? '1.2k' : '850'})</span>
                                 </div>
 
-                                <Link href={`/products/${product.slug}`} className="block mb-2">
-                                    <h3 className="text-sm md:text-base font-medium text-[#0F172A] line-clamp-2 md:min-h-[3rem]">
+                                <Link href={`/products/${product.slug}`} className="block mb-1">
+                                    <h3 className="text-sm font-medium text-[#1c2b4b] line-clamp-1">
                                         {product.name}
                                     </h3>
                                 </Link>
 
-                                <div className="mt-auto pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-bold text-[#0EA5E9]">₹{product.price.toLocaleString()}</span>
-                                        {product.discount && (
-                                            <span className="text-xs text-[#94A3B8] line-through">
-                                                ₹{Math.round(product.price / (1 - product.discount / 100)).toLocaleString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="p-2 rounded-full bg-blue-50 text-[#0EA5E9]">
-                                        <ChevronRight size={18} />
-                                    </div>
+                                <div className="flex items-baseline space-x-2">
+                                    <span className="text-lg font-bold text-[#0b6c2c]">₹{product.price.toLocaleString()}</span>
+                                    {product.discount && (
+                                        <span className="text-xs text-gray-400 line-through">
+                                            ₹{Math.round(product.price / (1 - product.discount / 100)).toLocaleString()}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     ))}
-                </div>
 
-                <div className="text-center mt-8">
-                    <Link href="/products" className="inline-flex items-center justify-center px-8 py-3 bg-[#0EA5E9] text-white rounded-full font-medium hover:bg-[#0284C7] transition-all">
-                        View All Best Sellers
-                    </Link>
+                    {/* Static Promotional Cards (Show if we have less than 4 products) */}
+                    {products.length < 3 && (
+                        <div className="group relative bg-white flex flex-col">
+                            {/* Image Container (Placeholder) */}
+                            <div className="block relative aspect-square mb-4 border border-gray-100 rounded-sm bg-gray-50/50 flex flex-col items-center justify-center p-4">
+                                <Droplet className="w-12 h-12 text-[#b5ddc2] mb-4" strokeWidth={1.5} />
+                                <span className="text-xs font-medium text-gray-500">New Model Coming Soon</span>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex flex-col flex-grow text-left">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">PRE-ORDER OPENING</span>
+                                <h3 className="text-sm font-medium text-[#1c2b4b] line-clamp-1 mb-1">
+                                    Elite RO Pro Max
+                                </h3>
+                                <span className="text-sm font-semibold text-[#0b6c2c]">Discover the future</span>
+                            </div>
+                        </div>
+                    )}
+
+
                 </div>
             </div>
         </section>

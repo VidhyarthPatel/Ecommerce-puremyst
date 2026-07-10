@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import logo from "../assets/logo.png";
 import NavClient from "./NavClient";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Truck, Globe, Smartphone, Mail } from "lucide-react";
 
 type DropdownItem = {
   href: string;
@@ -52,20 +52,38 @@ export default function NavServer() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled ? "shadow-lg backdrop-blur-md bg-[#007C91]/90" : "bg-[#007C91]"
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled ? "shadow-md bg-white" : "bg-white"
         }`}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8 relative">
-        <div className="flex items-center justify-between h-20">
+      {/* Top Banner */}
+      <div className="bg-[#0b6c2c] text-white text-xs sm:text-sm font-bold text-center py-2 uppercase tracking-wide w-full flex items-center justify-center h-8">
+        UP TO 50% OFF SITEWIDE + FREE INSTALLATION
+      </div>
+
+      {/* Secondary Info Bar */}
+      <div className="hidden lg:flex justify-between items-center px-4 sm:px-6 lg:px-8 py-2 border-b border-gray-100 text-xs text-gray-500 bg-gray-50 h-10">
+        <div className="flex items-center space-x-6">
+          <span className="flex items-center"><Truck size={14} className="mr-2" /> Free delivery on all orders</span>
+          <span className="flex items-center"><Globe size={14} className="mr-2" /> Empowering over 20 million customers worldwide</span>
+        </div>
+        <div className="flex items-center space-x-6">
+          <span className="flex items-center"><Smartphone size={14} className="mr-2" /> Exclusive offers on the App</span>
+          <span className="flex items-center"><Mail size={14} className="mr-2" /> Sign up to avail our latest deals</span>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 relative bg-white">
+        <div className="flex items-center justify-between h-18">
           {/* Logo */}
           <Link
             href="/"
-            className="relative w-32 h-50 md:w-40 md:h-50 group flex-shrink-0"
+            className="relative w-40 h-20 md:w-56 md:h-24 group flex-shrink-0"
           >
             <img
               src={logo.src}
               alt="PureMyst Logo"
-              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 brightness-0 invert"
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>
 
@@ -74,26 +92,26 @@ export default function NavServer() {
             {navItems.map((item) => (
               <li key={item.label} className="relative group">
                 {item.dropdown ? (
-                  <div className="relative">
+                  <div className="relative h-full flex items-center">
                     <button
                       type="button"
-                      className="flex items-center text-sm font-medium text-white hover:text-cyan-100 transition-colors duration-200 focus:outline-none"
+                      className="flex items-center text-xs font-bold text-gray-800 hover:text-[#0b6c2c] transition-colors duration-200 focus:outline-none uppercase tracking-wide h-full py-6"
                     >
                       {item.label}
                       <ChevronDown className="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
                     </button>
 
                     {/* Premium Dropdown */}
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-64 p-2 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top scale-95 group-hover:scale-100 z-50">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-[90%] mt-2 w-64 p-2 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top scale-95 group-hover:scale-100 z-50">
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100" />
                       <div className="relative flex flex-col gap-1 bg-white rounded-xl overflow-hidden">
                         {item.dropdownItems?.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.label}
                             href={dropdownItem.href}
-                            className={`px-4 py-3 text-sm rounded-lg transition-all duration-200 flex items-center justify-between group/item ${dropdownItem.highlight
-                              ? "bg-[#007C91]/5 text-[#007C91] font-semibold"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-[#007C91]"
+                            className={`px-4 py-3 text-xs rounded-lg transition-all duration-200 flex items-center justify-between group/item ${dropdownItem.highlight
+                              ? "bg-[#0b6c2c]/5 text-[#0b6c2c] font-bold"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-[#0b6c2c]"
                               }`}
                           >
                             {dropdownItem.label}
@@ -106,14 +124,14 @@ export default function NavServer() {
                 ) : (
                   <Link
                     href={item.href || "#"}
-                    className={`relative text-sm font-medium transition-colors duration-200 ${item.highlight
-                      ? "text-red-300 hover:text-red-100"
-                      : "text-white hover:text-cyan-100"
+                    className={`relative text-xs font-bold transition-colors duration-200 uppercase tracking-wide py-6 flex items-center ${item.highlight
+                      ? "text-red-500 hover:text-red-600"
+                      : "text-gray-800 hover:text-[#0b6c2c]"
                       }`}
                   >
                     {item.label}
                     {!item.highlight && (
-                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
+                      <span className="absolute bottom-4 left-0 w-0 h-0.5 bg-[#0b6c2c] transition-all duration-300 group-hover:w-full" />
                     )}
                   </Link>
                 )}
@@ -121,20 +139,11 @@ export default function NavServer() {
             ))}
           </ul>
 
-          <div className="hidden lg:flex items-center space-x-6">
-            <Link href="/products" className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-full shadow-md transition-all duration-300 hover:shadow-lg transform">
-              Shop Now
-            </Link>
-            {/* Client components like Search/Cart */}
+          <div className="hidden lg:flex items-center space-x-6 h-full">
             <NavClient navItems={navItems} />
           </div>
 
-          {/* Mobile Toggle (Inside NavClient but we need to structure it right) - Actually NavClient has the toggle. 
-              We passed navItems to NavClient. We should wrap NavClient to fit in.
-              Wait, NavClient creates the right side structure in the original code.
-              Let's check NavClient again.
-           */}
-          <div className="lg:hidden">
+          <div className="lg:hidden flex items-center h-full">
             <NavClient navItems={navItems} />
           </div>
         </div>

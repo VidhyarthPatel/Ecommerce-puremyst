@@ -1,10 +1,11 @@
 import Features from "@/components/Features";
 import CategorySection from "@/components/CategorySection";
-import PosterSlider from "@/components/PosterSlider";
+import HeroSection from "@/components/HeroSection";
 import BestSelling from "@/components/BestSelling";
 import Testimonials from "@/components/Testimonials";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import OurMission from "@/components/OurMission";
+import AboutUs from "@/components/AboutUs";
 import FAQ from "@/components/FAQ";
 import TrustedBy from "@/components/TrustedBy";
 import { Metadata } from "next";
@@ -89,10 +90,11 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <PosterSlider />
+      <HeroSection />
       <CategorySection />
       <BestSelling />
       <Features />
+      <AboutUs />
       <OurMission />
       <FAQ faqs={FAQS} />
       <Testimonials />
