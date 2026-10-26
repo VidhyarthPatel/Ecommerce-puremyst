@@ -113,7 +113,7 @@ export default async function ProductDetailPage({
   } : null;
 
   // Fetch related products
-  const relatedProducts = await prisma.products.findMany({
+  let relatedProducts = await prisma.products.findMany({
     where: {
       category: product.category,
       NOT: {
@@ -125,6 +125,20 @@ export default async function ProductDetailPage({
       ProductsImage: true,
     },
   });
+
+  if (relatedProducts.length === 0) {
+    relatedProducts = await prisma.products.findMany({
+      where: {
+        NOT: {
+          id: product.id,
+        },
+      },
+      take: 4,
+      include: {
+        ProductsImage: true,
+      },
+    });
+  }
 
   return (
     <>

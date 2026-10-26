@@ -169,7 +169,7 @@ export default function RazorpayCheckoutButton({
       type="button"
       onClick={handleCheckout}
       disabled={loading}
-      className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full py-4 bg-[#0b6c2c] hover:bg-[#085221] text-white rounded-sm font-bold text-sm tracking-wide uppercase transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading ? "Processing..." : `Pay ₹${amountRupees.toLocaleString()}`}
     </button>
